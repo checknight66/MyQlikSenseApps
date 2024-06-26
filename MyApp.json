@@ -1,0 +1,26 @@
+
+SHEETS
+
+OBJECTS ON SHEETS
+
+DIMENSIONS
+
+MASTER OBJECTS
+
+VARIABLES
+{"qName":"name","qDefinition":"Merchant Data","qMeta":{"privileges":["read","update","delete"]},"qInfo":{"qId":"c093b0a9-7a37-4720-8b4f-c525f4e54d2c","qType":"variable"},"qData":[],"qIsScriptCreated":true}
+{"qName":"index","qDefinition":"0","qMeta":{"privileges":["read","update","delete"]},"qInfo":{"qId":"109d18b1-06d7-47a7-86e7-9a44ae1e3922","qType":"variable"},"qData":[],"qIsScriptCreated":true}
+{"qName":"currentName","qDefinition":"Merchant Data","qMeta":{"privileges":["read","update","delete"]},"qInfo":{"qId":"1b0b752a-c96d-4e6f-98fc-f03edfcd714f","qType":"variable"},"qData":[],"qIsScriptCreated":true}
+{"qName":"matches","qDefinition":"0","qMeta":{"privileges":["read","update","delete"]},"qInfo":{"qId":"b9c1722a-1bc5-4da3-8b82-3fefdc5455f3","qType":"variable"},"qData":[],"qIsScriptCreated":true}
+
+FIELDS
+{"qIsHidden":true,"qIsSystem":true,"qName":"$Field","qCardinal":4,"qTags":["$key","$hidden","$system","$ascii","$text"],"qSrcTables":[]}
+{"qIsHidden":true,"qIsSystem":true,"qName":"$Table","qCardinal":1,"qTags":["$key","$hidden","$system","$ascii","$text"],"qSrcTables":[]}
+{"qIsHidden":true,"qIsSystem":true,"qName":"$Rows","qCardinal":1,"qTags":["$hidden","$system","$numeric","$integer"],"qSrcTables":[]}
+{"qIsHidden":true,"qIsSystem":true,"qName":"$Fields","qCardinal":1,"qTags":["$hidden","$system","$numeric","$integer"],"qSrcTables":[]}
+{"qIsHidden":true,"qIsSystem":true,"qName":"$FieldNo","qCardinal":4,"qTags":["$hidden","$system","$numeric","$integer"],"qSrcTables":[]}
+{"qIsHidden":true,"qIsSystem":true,"qName":"$Info","qCardinal":1,"qTags":["$hidden","$system","$ascii","$text"],"qSrcTables":[]}
+{"qName":"Merchant ID","qCardinal":19,"qTags":["$ascii","$text"],"qSrcTables":["Merchant Data"]}
+{"qName":"Merchant Name","qCardinal":19,"qTags":["$ascii","$text"],"qSrcTables":["Merchant Data"]}
+{"qName":"Merchant Rating","qCardinal":5,"qTags":["$numeric","$integer"],"qSrcTables":["Merchant Data"]}
+{"qName":"Purchase Category","qCardinal":5,"qTags":["$ascii","$text"],"qSrcTables":["Merchant Data"]}
