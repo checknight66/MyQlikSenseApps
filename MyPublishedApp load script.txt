@@ -1,4 +1,4 @@
-///$tab **Configuration **
+///$tab ** Configuration **
 TRACE Configuration;
 
 /////////////////////////////////////////// REQUIRED ///////////////////////////////////////////
@@ -6,7 +6,7 @@ TRACE Configuration;
 // API Key, which requires the "Developer Role" and APIs to be enabled within the tenant.
 
 /*
-1. The name of the REST connection that will be used. You must first create a valid REST connection to any endpoint to Qlik Sense tenant.
+The name of the REST connection that will be used. You must first create a valid REST connection to any endpoint to Qlik Sense tenant.
 		Example: '<Space>:<Connection Name>'
         			Note: ':<Connection Name>' is the relative path which will check for a connection in the current space.
 		Example Connection: 
@@ -18,209 +18,34 @@ TRACE Configuration;
 */
 SET vu_rest_connection = 'Monitoring Apps Managed:monitoring_apps_REST';
 
-   
-/*
-2. The location where you want to store your QVDs.
-		Example: '<Space>:<DataFiles>'
-        			Note: ':<Connection Name>' is the relative path which will check for a connection in the current space.
-*/
-SET vu_qvd_storage_connection = ':DataFiles';
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-///$tab * Optional Configuration *
-TRACE Optional Configuration;
-
-////////////////////////////////////////////////////////////////////////////////////////
-// Optional Configuration (No need to change these unless you desire)
-
-/*
-1. The timezone difference from GMT. Modifies the reload times to desired GMT offset
-		Example 1: -5
-        Example 2: 5
-*/
-SET vu_GMT_offset = 0;
-
-/* 
-2. Maximum days back to store reload data in QVDs
-		Example: 365
-*/
-SET vu_reload_rolling_range = 365;
-
-/*
-3. The user field to best represent the user: 'Id', 'Name', 'Subject', 'Email'
-*/
-SET vu_personal_space_user_field = 'Name';
-
-/*
-4. The number of days back to fetch data initially, before incrementally building
-*/
-SET vu_initial_days_back = 90;
-
-/*
-5. The number of days back to calculate reload concurrency by the second
-*/
-SET vu_reload_concurrency_days_back = 14;
-
-/*
-6. The page size to iterate over the reloads API. Must be between 1-100 (Default 100)
-   This can be useful if receiving the error: "Message too large: (Connector error: Received message larger than max (x vs. y)"
-   There is a 4 MB limit for the REST connector response size, so this variable controls how many reloads are brought back in one REST response
-   Note that if a single reload yields too large of a result (over 4MB), this will not help. That reload may have to be skipped with SET ErrorMode = 0;
-*/
-SET vu_reloads_page_size = 100;
-
-/*
-7. The page size to iterate over the audits API. Must be between 1-100 (Default 100)
-   This can help to relieve the weight on the audits API calls
-*/
-SET vu_audit_page_size = 100;
-
-
-////////////////////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////////////////////
-// Multi-Tenant App Configuration
-
-// This application has support for multi-tenancy. If this app is designated as a "parent" app, it loads in the generated
-// QVDs of all "child" apps from a centralized location (e.g., AWS S3, Azure Blob, or Google Cloud Storage where the 
-// "QlikMetaCollection" directory resides) and does not directly harvest any data itself, meaning it depends on the existence 
-// of "child" apps. If designated as a child app, it writes out all of its final QVDs post harvest to a centralized location.
-
-SET vu_multi_tenant_enabled 			= 0;					// To enable Multi-Tenant app support, regardless of "Parent" or "Child" (1 or 0)
-
-SET vu_is_parent_app 					= 0;					// If this application is to be the parent app across varying tenants (1 or 0)
-
-// The connection to the parent directory of the QlikMetaCollection directory, which houses all of the multi-tenant metadata.
-// This is the root location to read/write all QVDs to so that they can be loaded across tenants (S3, Azure Blob, or Google 
-// Cloud Storage). The final path will resemble "QlikMetaCollection/Tenants/<TenantID>/Monitoring/<Monitoring App Name>/<Table>.qvd". 
-// The location below should point to the parent directory of the "QlikMetaCollection" folder. If the "QlikMetaCollection" 
-// folder does not exist, it will be automatically created.
-
-// **Azure Blob, AWS S3, and Google CLoud Storage have been tested and confirmed to work without any modifications**
-SET vu_qlik_meta_collection_parent_dir = 'lib://:';			// Parent directory of the "QlikMetaCollection" folder (trailing slash optional)
-
-////////////////////////////////////////////////////////////////////////////////////////
 ///$tab << About >>
 /* 
 
-    ________     ______            _________   _______              ______                          
-    ___  __ \_______  /___________ ______  /   ___    |____________ ___  /____  ____________________
-    __  /_/ /  _ \_  /_  __ \  __ `/  __  /    __  /| |_  __ \  __ `/_  /__  / / /__  /_  _ \_  ___/
-    _  _, _//  __/  / / /_/ / /_/ // /_/ /     _  ___ |  / / / /_/ /_  / _  /_/ /__  /_/  __/  /    
-    /_/ |_| \___//_/  \____/\__,_/ \__,_/      /_/  |_/_/ /_/\__,_/ /_/  _\__, / _____/\___//_/     
-                                                                         /____/                     
-
-    Copyright 2024 QlikTech International
-    Created by Daniel Pilla, Principal Analytics Platform Architect, Qlik
-
-	About the "Reload Analyzer" app:
+    _______                                    __________             ______             _____              
+    ___    |_______________________________    ___  ____/__   _______ ___  /___  _______ __  /______________
+    __  /| |  ___/  ___/  _ \_  ___/_  ___/    __  __/  __ | / /  __ `/_  /_  / / /  __ `/  __/  __ \_  ___/
+    _  ___ / /__ / /__ /  __/(__  )_(__  )     _  /___  __ |/ // /_/ /_  / / /_/ // /_/ // /_ / /_/ /  /    
+    /_/  |_\___/ \___/ \___//____/ /____/      /_____/  _____/ \__,_/ /_/  \__,_/ \__,_/ \__/ \____//_/     
     
-    The Reload Analyzer is an application designed for Qlik Sense Enterprise SaaS to track and analyze 
-    application reloads within the tenant(s). Some of the benefits of this application are as follows:
+	
+    The Access Evaluator is a comprehensive dashboard to analyze user roles, access, and permissions across a Qlik Cloud tenant.
+    
+    This application provides access information for users based on their assigned roles. It does this using a snapshot of role
+    permissions taken at time of release, and does not consider user entitlements as a factor when evaluating what the user
+    can access. Do not use this tool for audit or regulatory needs.
 
-      - Track number of reloads by type (Scheduled, Hub, In App, API) and by User
-      - View all data connections of each application's most recent reload
-      - Find all applications that use a data connection
-      - Analyze concurrent reloads and max concurrent Peak Reload RAM (useful for Dedicated Capacity)
-      - Track reloads by Spaces
-      - View all tasks and their respective statuses
-      - Tie alerts into metrics, (e.g. A task has failed 5 times consecutively)
-
-    *This application pulls 90 days of reloads, and will then continue to build from there incrementally using QVDs.
-
+    Copyright 2023 QlikTech International
+    Created by Daniel Pilla, Master Principal Analytics Platform Architect, Qlik
+ 
 */
 ///$tab Variables
 SUB variables
-
-	LET vu_tenant_fqdn 				 = GetSysAttr('tenantUrl');
     
-  //// Calendar Variables
-  
-    LET vStartTime 					= Now(1);
-    LET vu_GMT_offset 				 = Replace(vu_GMT_offset,'+','');
-    LET vReloadDiffFromGMTString 	 = If(vu_GMT_offset=0,'GMT-00:00',
-        If(vu_GMT_offset<0,'GMT-' & Right('0' & Replace(vu_GMT_offset,'-',''),2) & ':00',
-        If(vu_GMT_offset>0,'GMT+' & Right('0' & vu_GMT_offset,2) & ':00')));  
-    LET vReloadTimeDiffFromGMT       = ConvertToLocalTime('$(vStartTime)','$(vReloadDiffFromGMTString)') - GMT();
-
-    LET vLast24Hours 				= Num(Floor(TimeStamp('$(vStartTime)'-1) + $(vReloadTimeDiffFromGMT)));
-    LET vLast72Hours 				= Num(Floor(TimeStamp('$(vStartTime)'-3) + $(vReloadTimeDiffFromGMT)));
-    LET vLast7Days 					= Num(Floor(TimeStamp('$(vStartTime)'-7) + $(vReloadTimeDiffFromGMT)));
-    LET vLast30Days	 				= Num(Floor(TimeStamp('$(vStartTime)'-30) + $(vReloadTimeDiffFromGMT)));
-    LET vLast60Days 				= Num(Floor(TimeStamp('$(vStartTime)'-60) + $(vReloadTimeDiffFromGMT)));
-    LET vLast90Days 				= Num(Floor(TimeStamp('$(vStartTime)'-90) + $(vReloadTimeDiffFromGMT)));
-    
-    LET vAPICallCounter 			 = 0;
-    
-    LET vMaxReloadAge        		 = TimeStamp(Date(Today(1)) - $(vu_reload_rolling_range));
-    
-    LET vMaxReloadConcurrencyDaysBack = TimeStamp(Date(Today(1)) - $(vu_reload_concurrency_days_back));
-    
-    LET v90BackGMT				 	 = Date(Today(1) - 90); // Given that the `reloads` endpoint goes back 180 but the `audits` only goes back 90, truncating both to 90
-
-	LET vInitialDaysBack			 = If($(vu_initial_days_back)>0 AND $(vu_initial_days_back)<=90,Date(Today(1) - $(vu_initial_days_back)),$(v90BackGMT)); // If there is an initial days back setting that is between 0 and 90, set it, otherwise set it to 90
-
-    LET vConcurrencyMinutes 		 = 1/60; // The width of the concurrency buckets for analyzing session and task concurrency. Default 1.
-
-    LET vAppQVDName					 = Lower(Replace('$(app_name)',' ','_'));
-
-    SET vOutputQVDName				 = 'lib://$(vu_qvd_storage_connection)/$(vAppQVDName)_$1_$2.qvd';
-
-    SET vIncremental 				 = 1;  // Incremental load flag -- default = 1 (active). This can be disabled by setting to 0 (why do that?)
-    
-    LET vReloadsQVD			 		 = '$(vOutputQVDName(Reloads,$(app_version)))';
-
-    LET vIncrementalQVDsAvailable    = If(Len(FileTime('$(vReloadsQVD)'))>0,1,0);  // Check to see that incremental QVDs are available
-    
-    LET vIncrementalMessage 		 = If($(vIncrementalQVDsAvailable)=1,'Incremental QVDs found','No Incremental QVDs found. Do not panic. I can fix that.');
-    
-    SET vu_personal_space_user_list  = 'id','name','subject','email';
-    
-  //// ARGB colors -- requires input value to set the intensity (alpha) value of the color.
-  
-    SET c_red_alpha				= 'ARGB($1,192,57,43)';
-    SET c_orange_alpha			= 'ARGB($1,233,141,54)'; 
-    SET c_yellow_alpha			= 'ARGB($1,237,200,58)';
-    SET c_green_alpha			= 'ARGB($1,17,119,51)';
-    SET c_purple_alpha			= 'ARGB($1,148,87,156)';
-    SET c_blue_alpha			= 'ARGB($1,71,104,136)';
-    SET c_gray_alpha 			= 'ARGB($1,89,86,90)';
-    SET c_red_breeze_alpha		= 'ARGB($1,155,58,59)';
-    SET c_orange_breeze_alpha	= 'ARGB($1,233,141,54)';
-    SET c_teal_breeze_alpha		= 'ARGB($1,19,118,122)';
-    SET c_green_breeze_alpha	= 'ARGB($1,101,177,99)';
-    SET c_red_0_green_alpha		= 'If($1=0,c_red,ARGB($1,101,177,99))';
-    
-    IF $(vu_is_parent_app)=0 THEN
-    
-        IF $(vIncrementalQVDsAvailable)=1 THEN
-
-            ReloadMaxEndTime:
-            LOAD
-                Max(ReloadEndTime) AS ReloadMaxEndTime
-            FROM '$(vReloadsQVD)'(qvd);
-
-            LET vIncrementalStartTime = Peek('ReloadMaxEndTime',0,'ReloadMaxEndTime') + (1 / 24 / 60 / 60 / 1000);
-
-            DROP TABLE ReloadMaxEndTime;
-
-            LET vIncrementalStartTimeDisplay = TimeStamp('$(vIncrementalStartTime)','MM/DD/YYYY hh:mm:ss.fff');
-
-            TRACE Incremental will resume from: $(vIncrementalStartTimeDisplay);
-
-            SET vIncrementalStartTimeDisplay =;
-
-        ELSE
-
-            TRACE $(vIncrementalMessage);
-
-            LET vIncrementalStartTime = '$(v90BackGMT)';
-
-        END IF
-    
-    END IF
-                
+    LET vAPICallCounter = 0;
+	LET vu_tenant_fqdn 	= GetSysAttr('tenantUrl');
+                            
 END SUB
 ///$tab Check Version
 SUB check_version
@@ -247,1034 +72,527 @@ SUB check_version
     LOAD	
         [version]
     RESIDENT RestConnectorMasterTable
-    WHERE name='$(app_name)';
+    WHERE name='$(vAppName)';
 
     DROP TABLE RestConnectorMasterTable;
 
     LET vLatestVersion = Peek('version',0,'Version');
-    LET vIsLatestVersion = If('$(vLatestVersion)'='v$(app_version)',1,0);
+    LET vIsLatestVersion = If('$(vLatestVersion)'='v$(vAppVersion)',1,0);
 
     DROP TABLE Version;
 
 END SUB
+///$tab Roles
+SUB get_roles
 
+    SET vParams = 'limit=100';
 
+    DO
 
-///$tab Tenant Metadata
-SUB get_tenant_metadata
+      LET vAPICallCounter = $(vAPICallCounter) + 1;
 
-  LIB CONNECT TO '$(vu_rest_connection)';
+      LIB CONNECT TO '$(vu_rest_connection)';
 
-  RestConnectorMasterTable:
-  SQL SELECT 
-      "__KEY_root",
-      (SELECT 
-          "id",
-          "name",
-          "datacenter",
-          "created",
-          "status",
-          "__FK_data",
-          "__KEY_data",
+      RestConnectorMasterTable:
+      SQL SELECT 
+          "__KEY_root",
           (SELECT 
-              "@Value",
-              "__FK_hostnames"
-          FROM "hostnames" FK "__FK_hostnames" ArrayValueAlias "@Value")
-      FROM "data" PK "__KEY_data" FK "__FK_data")
-  FROM JSON (wrap on) "root" PK "__KEY_root"
-  WITH CONNECTION (  
-    URL "https://$(vu_tenant_fqdn)/api/v1/tenants"
-  );
+              "id",
+              "tenantId",
+              "name",
+              "description",
+              "type",
+              "level",
+              "createdAt",
+              "lastUpdatedAt",
+              "__KEY_data",
+              "__FK_data",
+              (SELECT 
+                  "@Value",
+                  "__FK_permissions"
+              FROM "permissions" FK "__FK_permissions" ArrayValueAlias "@Value"),
+              (SELECT 
+                  "__KEY_links",
+                  "__FK_links",
+                  (SELECT 
+                      "href",
+                      "__FK_self"
+                  FROM "self" FK "__FK_self")
+              FROM "links" PK "__KEY_links" FK "__FK_links")
+          FROM "data" PK "__KEY_data" FK "__FK_data"),
+          (SELECT 
+              "__KEY_links_u0",
+              "__FK_links_u0",
+              (SELECT 
+                  "href" AS "href_u0",
+                  "__FK_self_u0"
+              FROM "self" FK "__FK_self_u0"),
+              (SELECT 
+                  "href" AS "href_u1",
+                  "__FK_next"
+              FROM "next" FK "__FK_next")
+          FROM "links" PK "__KEY_links_u0" FK "__FK_links_u0")
+      FROM JSON (wrap on) "root" PK "__KEY_root"
+      WITH CONNECTION (  
+        URL "https://$(vu_tenant_fqdn)/api/v1/roles?$(vParams)"
+      );
 
-  [Hostname]:
-  LOAD	
-      [@Value] AS Hostname
-  RESIDENT RestConnectorMasterTable
-  WHERE NOT IsNull([__FK_hostnames]);
+      [RolePermissions]:
+      LOAD	
+          Subfield([@Value],':',1) AS UserRolePermissionProperty,
+          Subfield([@Value],':',2) AS UserRolePermissionAction,
+          '✔' AS UserRolePermissionCheck,
+          [__FK_permissions] & '|' & '$(vAPICallCounter)' AS [_UserRolePermissionKey]
+      RESIDENT RestConnectorMasterTable
+      WHERE NOT IsNull([__FK_permissions]);
+
+      [Roles]:
+      LOAD	
+          [id] AS UserRoleID,
+  //         [tenantId],
+          [name] AS UserRoleName,
+          [description] AS UserRoleDescription,
+          [type] AS UserRoleType,
+          [level] AS UserRoleLevel,
+  //         Timestamp([createdAt]) AS RoleCreatedAt,
+  //         [lastUpdatedAt],
+           [__KEY_data] & '|' & '$(vAPICallCounter)' AS [_UserRolePermissionKey]
+  //        [__FK_data]
+      RESIDENT RestConnectorMasterTable
+      WHERE NOT IsNull([__FK_data]);
+
+      NextURL:
+      LOAD	
+          [href_u1] AS NextURL
+      RESIDENT RestConnectorMasterTable
+      WHERE NOT IsNull([__FK_next]);
 
 
-  [TenantMetadata]:
-  LOAD	
-      [id] AS TenantID,
-      [name] AS TenantName,
-      [datacenter] AS TenantDataCenter,
-      Date([created]) AS TenantCreatedDate,
-      [status] AS TenantStatus,
-      Peek('Hostname',0,'Hostname') AS Hostname,
-      TimeStamp('$(vStartTime)') AS LastReloadStartTime
-  RESIDENT RestConnectorMasterTable
-  WHERE NOT IsNull([__FK_data]);
+      DROP TABLE RestConnectorMasterTable;
 
-  DROP TABLE Hostname;
-  DROP TABLE RestConnectorMasterTable;
-  
-  LET vTenantID = Peek('TenantID',0,'TenantMetadata');
-  
-  Map_TenantID_TenantName:
-  MAPPING LOAD DISTINCT
-  	  TenantID,
-      TenantName
-  RESIDENT TenantMetadata;
+      LET vParams = SubField(Peek('NextURL',0,'NextURL'),'?',-1);
+      LET vNextURLRows = NoOfRows('NextURL');
 
+      DROP TABLE NextURL;
+
+    LOOP WHILE $(vNextURLRows)>0;
+
+    Map_RoleName_RoleID:
+    MAPPING LOAD DISTINCT
+        UserRoleName,
+        UserRoleID
+    RESIDENT Roles;
+      
 END SUB
-///$tab Get User Field
-SUB get_user_field
 
-    Lookup_UserVariable_FieldName:
-    LOAD * INLINE [
-        UserVariable	,FieldName
-        id			,ReloadUserID
-        subject		,ReloadUserSubject
-        email			,ReloadUserEmail
-        name			,ReloadUserName
-    ];
 
-    IF Match(Lower('$(vu_personal_space_user_field)'),$(vu_personal_space_user_list)) THEN
 
-        TRACE Using '$(vu_personal_space_user_field)' to construct 'Personal' space names;
-
-        LET vPersonalUserField = Lookup('FieldName','UserVariable',Lower('$(vu_personal_space_user_field)'),'Lookup_UserVariable_FieldName');
-
-    ELSE
-
-        TRACE The value for the variable 'vu_personal_space_user_field' must contain one of: $(vu_personal_space_user_list);
-        TRACE The value found was: '$(vu_personal_space_user_field)';
-        TRACE Defaulting to 'Subject';
-
-        SET vPersonalUserField = 'ReloadUserSubject';
-
-    END IF
-    
-    DROP TABLE Lookup_UserVariable_FieldName;
-  
-END SUB
 ///$tab Users
 SUB get_users
 
-  SET vParams = 'limit=100';
-  LET vCounter = 0;
+    SET vParams = 'limit=100&filter=(status eq ""active"")';
 
-  DO
-  
-  	LET vAPICallCounter = $(vAPICallCounter) + 1;
-  
-    LIB CONNECT TO '$(vu_rest_connection)';
+    UserGroups:
+    LOAD * INLINE [
+        GroupID
+    ];
 
-    RestConnectorMasterTable:
-    SQL SELECT 
-        "__KEY_root",
-        (SELECT 
-            "__KEY_links",
-            "__FK_links",
-            (SELECT 
-                "href",
-                "__FK_self"
-            FROM "self" FK "__FK_self"),
-            (SELECT 
-                "href" AS "href_u0",
-                "__FK_next"
-            FROM "next" FK "__FK_next")
-        FROM "links" PK "__KEY_links" FK "__FK_links"),
-        (SELECT 
-            "id",
-            "tenantId",
-            "created",
-            "lastUpdated",
-            "status",
-            "name",
-            "subject",
-            "email",
-            "__KEY_data",
-            "__FK_data",
-            (SELECT 
-                "@Value",
-                "__FK_roles"
-            FROM "roles" FK "__FK_roles" ArrayValueAlias "@Value"),
-            (SELECT 
-                "__KEY_links_u0",
-                "__FK_links_u0",
-                (SELECT 
-                    "href" AS "href_u1",
-                    "__FK_self_u0"
-                FROM "self" FK "__FK_self_u0")
-            FROM "links" PK "__KEY_links_u0" FK "__FK_links_u0")
-        FROM "data" PK "__KEY_data" FK "__FK_data")
-    FROM JSON (wrap on) "root" PK "__KEY_root"
-    WITH CONNECTION (  
-      URL "https://$(vu_tenant_fqdn)/api/v1/users?$(vParams)"
-    );
+    DO
+
+      LET vAPICallCounter = $(vAPICallCounter) + 1;
+
+      LIB CONNECT TO '$(vu_rest_connection)';
+
+      RestConnectorMasterTable:
+      SQL SELECT 
+          "__KEY_root",
+          (SELECT 
+              "id" AS "id_u2",
+              "tenantId",
+              "status",
+              "subject",
+              "name" AS "name_u2",
+              "email",
+              "picture",
+              "locale",
+              "zoneinfo",
+              "preferredLocale",
+              "preferredZoneinfo",
+              "createdAt",
+              "lastUpdatedAt",
+              "created",
+              "lastUpdated",
+              "__KEY_data",
+              "__FK_data",
+              (SELECT 
+                  "@Value",
+                  "__FK_roles"
+              FROM "roles" FK "__FK_roles" ArrayValueAlias "@Value"),
+              (SELECT 
+                  "id",
+                  "name",
+                  "type",
+                  "level",
+                  "__FK_assignedRoles"
+              FROM "assignedRoles" FK "__FK_assignedRoles"),
+              (SELECT 
+                  "id" AS "id_u1",
+                  "name" AS "name_u1",
+                  "assignedRoles",
+                  "__KEY_assignedGroups",
+                  "__FK_assignedGroups",
+                  (SELECT 
+                      "id" AS "id_u0",
+                      "name" AS "name_u0",
+                      "type" AS "type_u0",
+                      "level" AS "level_u0",
+                      "__FK_assignedRoles_u0"
+                  FROM "assignedRoles" FK "__FK_assignedRoles_u0")
+              FROM "assignedGroups" PK "__KEY_assignedGroups" FK "__FK_assignedGroups"),
+              (SELECT 
+                  "__KEY_links",
+                  "__FK_links",
+                  (SELECT 
+                      "href",
+                      "__FK_self"
+                  FROM "self" FK "__FK_self")
+              FROM "links" PK "__KEY_links" FK "__FK_links")
+          FROM "data" PK "__KEY_data" FK "__FK_data"),
+          (SELECT 
+              "__KEY_links_u0",
+              "__FK_links_u0",
+              (SELECT 
+                  "href" AS "href_u0",
+                  "__FK_self_u0"
+              FROM "self" FK "__FK_self_u0"),
+              (SELECT 
+                  "href" AS "href_u1",
+                  "__FK_next"
+              FROM "next" FK "__FK_next")
+          FROM "links" PK "__KEY_links_u0" FK "__FK_links_u0")
+      FROM JSON (wrap on) "root" PK "__KEY_root"
+      WITH CONNECTION (  
+        URL "https://$(vu_tenant_fqdn)/api/v1/users?$(vParams)"
+      );
+
+      Users:
+      LOAD	
+          [id_u2] AS UserID,
+  //         [id] AS UserID,
+  //         [tenantId],
+  //         Date([created]) AS ReloadUserCreatedDate,
+  //         Date([lastUpdated]) AS ReloadUserLastUpdatedDate,
+          [status] AS UserStatus,
+          [name_u2] AS UserName,
+          Dual([name_u2],AutoNumber(id_u2)) AS UserNameUnique,
+          [subject] AS UserSubject,
+          [email] AS UserEmail,
+          [__KEY_data] & '|' & '$(vAPICallCounter)' AS [_UserKey]
+      RESIDENT RestConnectorMasterTable
+      WHERE NOT IsNull([__FK_data]);
+
+      [UserRoles]:
+      LOAD	
+          ApplyMap('Map_RoleName_RoleID',[@Value]) AS UserRoleID,
+          'Direct' AS UserRoleAssignmentType,
+          '✔' AS UserRoleCheck,
+          '<Direct>' AS UserRoleInheritedFromGroup,
+          '<Direct>' AS UserRoleInheritedFromGroupID,
+  //         [name],
+  //         [type],
+  //         [level],
+          [__FK_roles] & '|' & '$(vAPICallCounter)' AS [_UserKey]
+      RESIDENT RestConnectorMasterTable
+      WHERE NOT IsNull([__FK_roles]);
+
+  //     UserGroupRoles:
+  //     LOAD	
+  //     	[id_u0] AS [GroupRoleID],
+  //         'Inherited' AS RoleAssignmentType,
+  // //         [name_u0] AS [name_u0],
+  // //         [type_u0] AS [type_u0],
+  // //         [level_u0] AS [level_u0],
+  //         [__FK_assignedRoles_u0] AS [_UserAssignedRolesKey]
+  //     RESIDENT RestConnectorMasterTable
+  //     WHERE NOT IsNull([__FK_assignedRoles_u0]);
+
+      CONCATENATE(UserGroups)
+      LOAD	
+          [id_u1] AS [GroupID],
+  //                             [name_u1] AS [GroupName],
+  //                             [assignedRoles] AS [AssignedRoles(IsEmpty?)],
+  //         [__KEY_assignedGroups] AS [_UserAssignedRolesKey],
+          [__FK_assignedGroups] & '|' & '$(vAPICallCounter)' AS [_UserKey]
+      RESIDENT RestConnectorMasterTable
+      WHERE NOT IsNull([__FK_assignedGroups]);
+
+      NextURL:
+      LOAD	
+          [href_u1] AS NextURL
+      RESIDENT RestConnectorMasterTable
+      WHERE NOT IsNull([__FK_next]);
 
 
-    Users:
-    LOAD	
-    	[id] AS ReloadUserID,
-//         [id] AS UserID,
-//         [tenantId],
-//         Date([created]) AS ReloadUserCreatedDate,
-//         Date([lastUpdated]) AS ReloadUserLastUpdatedDate,
-        [status] AS ReloadUserStatus,
-        [name] AS ReloadUserName,
-        [subject] AS ReloadUserSubject,
-        [email] AS ReloadUserEmail,
-        [__KEY_data] & '|' & $(vCounter) & '|' & '$(vTenantID)' AS [_UserKey]
-    RESIDENT RestConnectorMasterTable
-    WHERE NOT IsNull([__FK_data])
-    AND Match(status,'disabled','active');
+      DROP TABLE RestConnectorMasterTable;
+
+      LET vParams = SubField(Peek('NextURL',0,'NextURL'),'?',-1);
+      LET vNextURLRows = NoOfRows('NextURL');
+
+      DROP TABLE NextURL;
+
+    LOOP WHILE $(vNextURLRows)>0;
     
-    [UserRoles]:
-    LOAD	
-    	[@Value] AS UserRole,
-        [__FK_roles] & '|' & $(vCounter) & '|' & '$(vTenantID)' AS [_UserKey]
-    RESIDENT RestConnectorMasterTable
-    WHERE NOT IsNull([__FK_roles]);
-
-    NextURL:
-    LOAD	
-    	[href_u0] AS NextURL
-    RESIDENT RestConnectorMasterTable
-    WHERE NOT IsNull([__FK_next]);
-
-    DROP TABLE RestConnectorMasterTable;
-    
-    LET vParams = SubField(Peek('NextURL',0,'NextURL'),'?',-1);
-    LET vNextURLRows = NoOfRows('NextURL');
-
-    DROP TABLE NextURL;
-    
-    LET vCounter = $(vCounter) + 1;
-
-  LOOP WHILE $(vNextURLRows)>0;
-  
-  // Don't create map yet for OEM Dash support
-  Map_AppOwner_Exists:
-  LOAD DISTINCT
-  	  ReloadUserID,
-      1
-  RESIDENT Users;
-  
-  RENAME TABLE UserRoles TO TEMP;
-  
-  UserRoles:
-  LEFT KEEP(Users)
-  LOAD *
-  RESIDENT TEMP;
-  
-  DROP TABLE TEMP;
-  
-  Map_AppOwner_UserName:
-  MAPPING LOAD DISTINCT
-  	  ReloadUserID,
-      ReloadUserName
-  RESIDENT Users;
-  
-  Map_AppOwner_UserSubject:
-  MAPPING LOAD DISTINCT
-  	  ReloadUserID,
-      ReloadUserSubject
-  RESIDENT Users;
-  
-  Map_AppOwner_UserEmail:
-  MAPPING LOAD DISTINCT
-  	  ReloadUserID,
-      ReloadUserEmail
-  RESIDENT Users;
-  
-  Call get_user_field
-  
-  Map_UserID_$(vPersonalUserField):
-  MAPPING LOAD DISTINCT
-      ReloadUserID,
-      $(vPersonalUserField)
-  RESIDENT Users;
-      
+    Map_UserID_UserName:
+    MAPPING LOAD DISTINCT
+    	UserID,
+        UserName
+    RESIDENT Users;
+        
 END SUB
+
+
+
+///$tab Groups
+SUB get_groups
+
+    SET vParams = 'limit=100';
+
+    Groups:
+    LOAD 
+    	'000000000000000000000001' AS GroupID,
+    	'Anyone at ' & Subfield('$(vu_tenant_fqdn)','.',1) AS GroupName,
+        'active' AS GroupStatus
+    AUTOGENERATE 1;
+
+    GroupAssignedRoles:
+    LOAD * INLINE [
+        GroupAssignedRoleID
+    ];
+
+    DO
+
+      LET vAPICallCounter = $(vAPICallCounter) + 1;
+
+      LIB CONNECT TO '$(vu_rest_connection)';
+
+      RestConnectorMasterTable:
+      SQL SELECT 
+          "__KEY_root",
+          (SELECT 
+              "id" AS "id_u0",
+              "tenantId",
+              "createdAt",
+              "lastUpdatedAt",
+              "name" AS "name_u0",
+              "status",
+              "__KEY_data",
+              "__FK_data",
+              (SELECT 
+                  "__KEY_links",
+                  "__FK_links",
+                  (SELECT 
+                      "href",
+                      "__FK_self"
+                  FROM "self" FK "__FK_self")
+              FROM "links" PK "__KEY_links" FK "__FK_links"),
+              (SELECT 
+                  "id",
+                  "name",
+                  "type",
+                  "level",
+                  "__FK_assignedRoles"
+              FROM "assignedRoles" FK "__FK_assignedRoles")
+          FROM "data" PK "__KEY_data" FK "__FK_data"),
+          (SELECT 
+              "__KEY_links_u0",
+              "__FK_links_u0",
+              (SELECT 
+                  "href" AS "href_u0",
+                  "__FK_self_u0"
+              FROM "self" FK "__FK_self_u0"),
+              (SELECT 
+                  "href" AS "href_u1",
+                  "__FK_next"
+              FROM "next" FK "__FK_next")
+          FROM "links" PK "__KEY_links_u0" FK "__FK_links_u0")
+      FROM JSON (wrap on) "root" PK "__KEY_root"
+      WITH CONNECTION (  
+        URL "https://$(vu_tenant_fqdn)/api/v1/groups?$(vParams)"
+      );
+
+      CONCATENATE(Groups)
+      LOAD	
+          [id_u0] AS GroupID,
+  //         [tenantId],
+          [createdAt] AS GroupCreatedAt,
+  //         [lastUpdatedAt],
+          [name_u0] AS GroupName,
+          [status] AS GroupStatus,
+          [__KEY_data] & '|' & '$(vAPICallCounter)' AS _GroupRoleKey
+  //         [__FK_data] AS [__KEY_root]
+      RESIDENT RestConnectorMasterTable
+      WHERE NOT IsNull([__FK_data]);
+
+      CONCATENATE(GroupAssignedRoles)
+      LOAD	
+          [id] AS GroupAssignedRoleID,
+  //         [type],
+  //         [level],
+          [__FK_assignedRoles] & '|' & '$(vAPICallCounter)' AS _GroupRoleKey
+      RESIDENT RestConnectorMasterTable
+      WHERE NOT IsNull([__FK_assignedRoles]);
+
+      NextURL:
+      LOAD	
+          [href_u1] AS NextURL
+      RESIDENT RestConnectorMasterTable
+      WHERE NOT IsNull([__FK_next]);
+
+      DROP TABLE RestConnectorMasterTable;
+
+      LET vParams = SubField(Peek('NextURL',0,'NextURL'),'?',-1);
+      LET vNextURLRows = NoOfRows('NextURL');
+
+      DROP TABLE NextURL;
+
+    LOOP WHILE $(vNextURLRows)>0;
+
+    LEFT JOIN(Groups)
+    LOAD DISTINCT * RESIDENT GroupAssignedRoles;
+
+    DROP TABLE GroupAssignedRoles;
+    DROP FIELD _GroupRoleKey;
+
+    Map_GroupID_GroupName:
+    MAPPING LOAD DISTINCT
+        GroupID,
+        GroupName
+    RESIDENT Groups;
+    
+    Map_AllGroupIDs:
+    MAPPING LOAD DISTINCT
+        GroupID,
+        1
+    RESIDENT Groups;
+        
+END SUB
+
+
+
 ///$tab Spaces
 SUB get_spaces
 
-  SET vParams = 'limit=100';
-  
-  [Spaces]:
-  LOAD * INLINE [SpaceID];
+    SET vParams = 'limit=100';
 
-  DO
-  
-    LET vAPICallCounter = $(vAPICallCounter) + 1;
-  
-    LIB CONNECT TO '$(vu_rest_connection)';
+    [Spaces]:
+    LOAD * INLINE [SpaceID];
+
+    DO
+
+      LET vAPICallCounter = $(vAPICallCounter) + 1;
+
+      LIB CONNECT TO '$(vu_rest_connection)';
+
+      RestConnectorMasterTable:
+      SQL SELECT 
+          "__KEY_root",
+          (SELECT 
+              "id",
+              "type",
+              "ownerId",
+              "tenantId",
+              "name",
+              "description",
+              "createdAt",
+              "createdBy",
+              "updatedAt",
+              "__KEY_data",
+              "__FK_data",
+              (SELECT 
+                  "__KEY_meta",
+                  "__FK_meta"
+              FROM "meta" PK "__KEY_meta" FK "__FK_meta"),
+              (SELECT 
+                  "__KEY_links",
+                  "__FK_links"
+              FROM "links" PK "__KEY_links" FK "__FK_links")
+          FROM "data" PK "__KEY_data" FK "__FK_data"),
+          (SELECT 
+              "__KEY_links_u0",
+              "__FK_links_u0",
+              (SELECT 
+                  "href" AS "href_u2",
+                  "__FK_next"
+              FROM "next" FK "__FK_next")
+          FROM "links" PK "__KEY_links_u0" FK "__FK_links_u0")
+      FROM JSON (wrap on) "root" PK "__KEY_root"
+      WITH CONNECTION (  
+        URL "https://$(vu_tenant_fqdn)/api/v1/spaces?$(vParams)"
+      );
+
+      CONCATENATE (Spaces)
+      LOAD	
+        [id] AS SpaceID,
+        Capitalize([type]) AS SpaceType,
+        [ownerId] AS SpaceOwnerID,
+        // [tenantId],
+        [name] AS SpaceName,
+        Dual([name],AutoNumber([id])) AS SpaceNameUnique,
+        [name] AS SpaceNameText,
+        [description] AS SpaceDescription,
+        TimeStamp([createdAt]) AS SpaceCreatedTime,
+        [createdBy] AS SpaceCreatedBy
+        // [updatedAt],
+        // [__KEY_data],
+        // [__FK_data] AS [__KEY_root]
+      RESIDENT RestConnectorMasterTable
+      WHERE NOT IsNull([__FK_data]);
+
+      NextURL:
+      LOAD	
+          [href_u2] AS NextURL
+      RESIDENT RestConnectorMasterTable
+      WHERE NOT IsNull([__FK_next]);
+
+      DROP TABLE RestConnectorMasterTable;
+
+      LET vParams = SubField(Peek('NextURL',0,'NextURL'),'?',-1);
+      LET vNextURLRows = NoOfRows('NextURL');
+
+      DROP TABLE NextURL;
+
+    LOOP WHILE $(vNextURLRows)>0;
+
+    AllSpacesMap:
+    MAPPING LOAD DISTINCT
+        SpaceID,
+        1
+    RESIDENT Spaces;
+
+    Map_SpaceID_SpaceType:
+    MAPPING LOAD DISTINCT
+        SpaceID,
+        SpaceType
+    RESIDENT Spaces;
     
-    RestConnectorMasterTable:
-    SQL SELECT 
-        "__KEY_root",
-        (SELECT 
-            "id",
-            "type",
-            "ownerId",
-            "tenantId",
-            "name",
-            "description",
-            "createdAt",
-            "createdBy",
-            "updatedAt",
-            "__KEY_data",
-            "__FK_data",
-            (SELECT 
-                "__KEY_meta",
-                "__FK_meta"
-            FROM "meta" PK "__KEY_meta" FK "__FK_meta"),
-            (SELECT 
-                "__KEY_links",
-                "__FK_links"
-            FROM "links" PK "__KEY_links" FK "__FK_links")
-        FROM "data" PK "__KEY_data" FK "__FK_data"),
-        (SELECT 
-            "__KEY_links_u0",
-            "__FK_links_u0",
-            (SELECT 
-                "href" AS "href_u2",
-                "__FK_next"
-            FROM "next" FK "__FK_next")
-        FROM "links" PK "__KEY_links_u0" FK "__FK_links_u0")
-    FROM JSON (wrap on) "root" PK "__KEY_root"
-    WITH CONNECTION (  
-      URL "https://$(vu_tenant_fqdn)/api/v1/spaces?$(vParams)"
-    );
+    AppSharesLink:
+    LOAD DISTINCT
+    	SpaceID & '|' AS _SpaceAppKey,
+        SpaceID,
+        Null() AS AppID
+    RESIDENT Spaces;
     
-    CONCATENATE (Spaces)
-    LOAD	
-      [id] AS SpaceID,
-      Capitalize([type]) AS SpaceType,
-      [ownerId] AS SpaceOwnerID,
-      // [tenantId],
-      [name] AS SpaceName,
-      [description] AS SpaceDescription,
-      TimeStamp([createdAt]) AS SpaceCreatedTime,
-      [createdBy] AS SpaceCreatedBy
-      // [updatedAt],
-      // [__KEY_data],
-      // [__FK_data] AS [__KEY_root]
-    RESIDENT RestConnectorMasterTable
-    WHERE NOT IsNull([__FK_data]);
-
-    NextURL:
-    LOAD	
-    	[href_u2] AS NextURL
-    RESIDENT RestConnectorMasterTable
-    WHERE NOT IsNull([__FK_next]);
-
-    DROP TABLE RestConnectorMasterTable;
-
-    LET vParams = SubField(Peek('NextURL',0,'NextURL'),'?',-1);
-    LET vNextURLRows = NoOfRows('NextURL');
-
-    DROP TABLE NextURL;
-    
-  LOOP WHILE $(vNextURLRows)>0;
-
-  AllSpacesMap:
-  MAPPING LOAD DISTINCT
-      SpaceID,
-      1
-  RESIDENT Spaces;
-  
-  Map_SpaceName_SpaceID:
-  MAPPING LOAD DISTINCT
-  	  Text(SpaceName) AS SpaceName,
-      SpaceID
-  RESIDENT Spaces;
-  
-  Map_SpaceID_SpaceName:
-  MAPPING LOAD DISTINCT
-  	  SpaceID,
-  	  Text(SpaceName) AS SpaceName
-  RESIDENT Spaces;
-  
-  Map_SpaceID_OwnerID:
-  MAPPING LOAD DISTINCT
-  	  SpaceID,
-  	  SpaceOwnerID
-  RESIDENT Spaces;
-  
-  Map_SpaceID_SpaceType:
-  MAPPING LOAD DISTINCT
-  	  SpaceID,
-  	  SpaceType
-  RESIDENT Spaces;
-  
 END SUB
 
-///$tab Data-Connections
-SUB get_data_connections
-
-  SET vParams = 'limit=100';
-  
-  [DataConnections]:
-  LOAD * INLINE [DataConnectionID];
-
-  DO
-  
-    LET vAPICallCounter = $(vAPICallCounter) + 1;
-  
-    LIB CONNECT TO '$(vu_rest_connection)';
-    
-    RestConnectorMasterTable:
-    SQL SELECT 
-        "__KEY_root",
-        (SELECT 
-            "created",
-            "datasourceID",
-            "id",
-            "qArchitecture",
-            "qConnectStatement",
-            "qCredentialsID",
-            "qEngineObjectID",
-            "qID",
-            "qLogOn",
-            "qName",
-            "qSeparateCredentials",
-            "qType",
-            "space",
-            "updated",
-            "user",
-            "version",
-            "__KEY_data",
-            "__FK_data"
-        FROM "data" PK "__KEY_data" FK "__FK_data"),
-        (SELECT 
-            "__KEY_links_u0",
-            "__FK_links_u0",
-            (SELECT 
-                "href" AS "href_u0",
-                "__FK_next"
-            FROM "next" FK "__FK_next")
-        FROM "links" PK "__KEY_links_u0" FK "__FK_links_u0")
-    FROM JSON (wrap on) "root" PK "__KEY_root"
-    WITH CONNECTION (  
-      URL "https://$(vu_tenant_fqdn)/api/v1/data-connections?$(vParams)"
-    );
-    
-    CONCATENATE (DataConnections)
-    LOAD
-    	'$(vTenantID)' AS DataConnectionTenantID,
-        ApplyMap('Map_TenantID_TenantName','$(vTenantID)') AS DataConnectionTenantName,
-    	TimeStamp([created]) AS DataConnectionCreatedTime,
-		[datasourceID] AS DataConnectionDataSourceID,
-        If(WildMatch([datasourceID],'DG_*'),'True','False') AS DataConnectionUsesDirectAccessGateway,
-        [id] AS DataConnectionID,
-//         [qArchitecture],
-        [qConnectStatement] AS DataConnectionStatement,
-//         [qCredentialsID],
-//         [qEngineObjectID],
-//         [qID],
-//         [qLogOn],
-        [qName] AS DataConnectionName,
-//         [qSeparateCredentials],
-        [qType] AS DataConnectionType,
-        [space] AS DataConnectionSpaceID,
-        If(Len(ApplyMap('Map_SpaceID_SpaceName',[space]))>0,
-        	ApplyMap('Map_SpaceID_SpaceName',[space],'[Deleted]'),
-            'Personal - ' & ApplyMap('Map_UserID_$(vPersonalUserField)',user,'DataFiles')
-          ) AS DataConnectionSpaceName,
-        ApplyMap('Map_SpaceID_SpaceType',[space],'[Deleted]') AS DataConnectionSpaceType,
-        TimeStamp([updated]) AS DataConnectionUpdated,
-        [user] AS DataConnectionUserID,
-        ApplyMap('Map_UserID_$(vPersonalUserField)',[user],'[Deleted]') AS DataConnectionOwner
-//         [version],
-//         [__KEY_data],
-//         [__FK_data] AS [__KEY_root]
-    RESIDENT RestConnectorMasterTable
-    WHERE NOT IsNull([__FK_data]);
-
-    NextURL:
-    LOAD	
-        [href_u0] AS NextURL
-    RESIDENT RestConnectorMasterTable
-    WHERE NOT IsNull([__FK_next]);
-
-    DROP TABLE RestConnectorMasterTable;
-
-    LET vParams = SubField(Peek('NextURL',0,'NextURL'),'?',-1);
-    LET vNextURLRows = NoOfRows('NextURL');
-
-    DROP TABLE NextURL;
-    
-  LOOP WHILE $(vNextURLRows)>0;
-  
-  RENAME TABLE DataConnections TO TEMP;
-    
-  DataConnections:
-  NOCONCATENATE LOAD
-  	  *
-  RESIDENT TEMP
-  WHERE DataConnectionName <> 'MyDataFiles'
-  ORDER BY DataConnectionName ASC;
-  
-  CONCATENATE(DataConnections)
-  LOAD
-      '[Unknown Endpoints Connection]' AS DataConnectionID,
-      'endpoints' AS DataConnectionType,
-      '[Unknown Endpoints Connection]' AS DataConnectionName,
-      '[Unknown Endpoints Connection]' AS DataConnectionNameUniqueTemp
-  AUTOGENERATE(1);
-  
-  DROP TABLE TEMP;
-  
-  Map_DataConnectionID_DataConnectionType:
-  MAPPING LOAD DISTINCT
-      DataConnectionID,
-      DataConnectionType
-  RESIDENT DataConnections;
-  
-  Map_DataConnectionID_DataConnectionSpaceID:
-  MAPPING LOAD DISTINCT
-      DataConnectionID,
-      DataConnectionSpaceID
-  RESIDENT DataConnections;
-  
-  Map_DataConnectionID_DataConnectionName:
-  MAPPING LOAD DISTINCT
-      DataConnectionID,
-      DataConnectionName
-  RESIDENT DataConnections;
-  
-  // GET FILE EXTENSIONS
-  
-  LET vAPICallCounter = $(vAPICallCounter) + 1;
-
-  LIB CONNECT TO '$(vu_rest_connection)';
-
-  RestConnectorMasterTable:
-  SQL SELECT 
-      "__KEY_root",
-      (SELECT 
-          "@Value",
-          "__FK_allowedExtensions"
-      FROM "allowedExtensions" FK "__FK_allowedExtensions" ArrayValueAlias "@Value"),
-      (SELECT 
-          "@Value" AS "@Value_u0",
-          "__FK_allowedInternalExtensions"
-      FROM "allowedInternalExtensions" FK "__FK_allowedInternalExtensions" ArrayValueAlias "@Value_u0")
-  FROM JSON (wrap on) "root" PK "__KEY_root"
-  WITH CONNECTION (  
-    URL "https://$(vu_tenant_fqdn)/api/v1/data-files/quotas"
-  );
-
-  [FileExtensions]:
-  LOAD	
-  	  [@Value] AS FileExtension
-  RESIDENT RestConnectorMasterTable
-  WHERE NOT IsNull([__FK_allowedExtensions]);
-
-  CONCATENATE(FileExtensions)
-  LOAD	
-  	  [@Value_u0] AS FileExtension
-  RESIDENT RestConnectorMasterTable
-  WHERE NOT IsNull([__FK_allowedInternalExtensions]);
-
-  DROP TABLE RestConnectorMasterTable;
-  
-  Map_FileExtensions:
-  MAPPING LOAD DISTINCT
-  	  FileExtension,
-      1
-  RESIDENT FileExtensions;
-  
-  DROP TABLE FileExtensions;
-
-END SUB
 
 ///$tab Apps
-SUB get_apps
+Sub get_apps
 
-  SET vParams = 'limit=100&resourceType=app&noActions=true';
+    SET vParams = 'limit=100&resourceType=app,qvapp&noActions=true';
 
-  DO
-  
-    LET vAPICallCounter = $(vAPICallCounter) + 1;
-  
-    LIB CONNECT TO '$(vu_rest_connection)';
-
-    RestConnectorMasterTable:
-    SQL SELECT 
-        "__KEY_root",
-        (SELECT 
-            "name" AS "name_u0",
-            "resourceCustomAttributes",
-            "resourceUpdatedAt",
-            "resourceType",
-            "resourceId",
-            "resourceCreatedAt",
-            "id" AS "id_u0",
-            "createdAt",
-            "updatedAt",
-            "creatorId",
-            "updaterId",
-            "tenantId",
-            "isFavorited" AS "isFavorited_u0",
-            "ownerId" AS "ownerId_u0",
-            "description" AS "description_u0",
-            "__KEY_data",
-            "__FK_data",
-            (SELECT 
-                "_resourcetype",
-                "createdDate",
-                "description",
-                "dynamicColor",
-                "hasSectionAccess",
-                "id",
-                "lastReloadTime",
-                "modifiedDate",
-                "name",
-                "originAppId",
-                "owner",
-                "ownerId",
-                "publishTime",
-                "published",
-                "spaceId",
-                "thumbnail",
-                "encrypted",
-                "__FK_resourceAttributes"
-            FROM "resourceAttributes" FK "__FK_resourceAttributes"),
-            (SELECT 
-                "__KEY_links",
-                "__FK_links"
-            FROM "links" PK "__KEY_links" FK "__FK_links"),
-            (SELECT 
-                "__KEY_meta",
-                "__FK_meta"
-            FROM "meta" PK "__KEY_meta" FK "__FK_meta")
-        FROM "data" PK "__KEY_data" FK "__FK_data"),
-        (SELECT 
-            "__KEY_links_u0",
-            "__FK_links_u0",
-            (SELECT 
-                "href" AS "href_u4",
-                "__FK_next"
-            FROM "next" FK "__FK_next")
-        FROM "links" PK "__KEY_links_u0" FK "__FK_links_u0")
-    FROM JSON (wrap on) "root" PK "__KEY_root"
-    WITH CONNECTION (  
-      URL "https://$(vu_tenant_fqdn)/api/v1/items?$(vParams)"
-    );
-
-
-    [Apps]:
-    LOAD
-    	'$(vTenantID)' AS TenantID,
-        [name_u0] AS AppName,
-        // [resourceCustomAttributes],
-        // [resourceUpdatedAt],
-        // [resourceType],
-        [resourceId] AS AppID,
-        TimeStamp([resourceCreatedAt]) AS AppCreatedTime,
-        // [id_u0] as [id_u0],
-        // [createdAt],
-        TimeStamp([updatedAt]) AS AppUpdatedTime,
-        [creatorId] AS AppCreatorID,
-        [updaterId] AS AppUpdaterID,
-        // [tenantId],
-        [isFavorited_u0] AS AppIsFavorited,
-//         [ownerId_u0] AS AppOwnerID,
-        [description_u0] AS AppDescription
-    RESIDENT RestConnectorMasterTable
-    WHERE NOT IsNull([__FK_data]);
-
-    AppDetails:
-    LOAD	
-        // [_resourcetype],
-        // [createdDate],
-        // [description],
-        // [dynamicColor],
-        [hasSectionAccess] AS AppHasSectionAccess,
-        [id] AS AppID,
-        [ownerId] AS AppOwnerID,
-        TimeStamp([lastReloadTime]) AS AppLastReloadTime,
-        TimeStamp(TimeStamp([lastReloadTime]) + $(vReloadTimeDiffFromGMT)) AS AppLastReloadTimeLocalServerTime,
-        // [modifiedDate],
-        // [name],
-        [originAppId] AS AppOriginalID,
-//         [owner] as AppOwnerSubject,
-        ApplyMap('Map_AppOwner_UserSubject',ownerId,'[Deleted]') AS AppOwnerSubject,
-        ApplyMap('Map_AppOwner_UserName',ownerId,'[Deleted]') AS AppOwnerName,
-        ApplyMap('Map_AppOwner_UserEmail',ownerId,'[Deleted]') AS AppOwnerEmail,
-        // [ownerId],
-//         [published] as AppPublished, // Only relevant for apps distributed from QSEoW
-        TimeStamp([publishTime]) AS AppPublishedTime,
-        If(ApplyMap('AllSpacesMap',spaceId)<>1,
-            If(Len(ApplyMap('Map_UserID_$(vPersonalUserField)',ownerId,'[Deleted]'))>0,
-            	'Personal - ' & ApplyMap('Map_UserID_$(vPersonalUserField)',ownerId,'[Deleted]'),
-                '[Staged]'
-               ),
-            spaceId
-            ) AS SpaceID,
-        // [thumbnail],
-        [encrypted] AS AppEncrypted
-    RESIDENT RestConnectorMasterTable
-    WHERE NOT IsNull([__FK_resourceAttributes])
-    AND [published]<>'True';
-
-    NextURL:
-    LOAD	
-    	[href_u4] AS NextURL
-    RESIDENT RestConnectorMasterTable
-    WHERE NOT IsNull([__FK_next]);
-
-    DROP TABLE RestConnectorMasterTable;
-    
-    LET vParams = SubField(Peek('NextURL',0,'NextURL'),'?',-1);
-    LET vNextURLRows = NoOfRows('NextURL');
-
-    DROP TABLE NextURL;
-
-  LOOP WHILE $(vNextURLRows)>0;
-  
-  CONCATENATE(Spaces)
-  LOAD DISTINCT
-      SpaceID,
-      SpaceID AS SpaceName,
-      'Personal' AS SpaceType,
-      AppOwnerID AS SpaceOwnerID,
-      '[N/A]' AS SpaceDescription,
-      '[N/A]' AS SpaceCreatedTime,
-      '[N/A]' AS SpaceCreatedBy
-  RESIDENT AppDetails
-  WHERE WildMatch(SpaceID,'Personal - *');
-  
-  INNER JOIN(Apps)
-  LOAD 
-  	  *,
-      If(WildMatch(SpaceID,'Personal - *'),SpaceID,ApplyMap('Map_SpaceID_SpaceName',SpaceID)) AS AppSpaceName
-  Resident AppDetails;
-  
-  DROP TABLE AppDetails;
-  
-  Map_AppID_SpaceID:
-  MAPPING LOAD DISTINCT
-  	  AppID,
-      SpaceID
-  RESIDENT Apps;
-  
-  Map_AllApps:
-  MAPPING LOAD DISTINCT
-  	  AppID,
-      1
-  RESIDENT Apps;
-  
-  // No map yet for OEM Dashboard support
-  Map_AllApps_Temp:
-  LOAD DISTINCT
-  	  AppID,
-      1
-  RESIDENT Apps;
-  
-  Map_AppID_UserID:
-  MAPPING LOAD DISTINCT
-  	  AppID,
-      AppOwnerID
-  RESIDENT Apps;
-  
-END SUB
-///$tab Reloads
-SUB get_reloads
-
-  SET vParams = 'limit=$(vu_reloads_page_size)';
-  SET vRows = 0;
-  SET vCurrentRows = 0;
-  SET vContinue = 1;
-  SET vAdditionalCalls = 0;
-  SET vMaxAdditionalCalls = 10;
-
-  DO
-  
-  	LET vAPICallCounter = $(vAPICallCounter) + 1;
-  
-    LIB CONNECT TO '$(vu_rest_connection)';
-
-    RestConnectorMasterTable:
-    SQL SELECT 
-        "__KEY_root",
-        (SELECT 
-            "id",
-            "appId",
-            "tenantId",
-            "userId",
-            "type",
-            "status",
-//             "log",
-            "duration",
-            "creationTime",
-            "startTime",
-            "endTime",
-            "engineTime",
-            "__KEY_data",
-            "__FK_data",
-            (SELECT 
-                "__KEY_links",
-                "__FK_links",
-                (SELECT 
-                    "href",
-                    "__FK_self"
-                FROM "self" FK "__FK_self")
-            FROM "links" PK "__KEY_links" FK "__FK_links")
-        FROM "data" PK "__KEY_data" FK "__FK_data"),
-        (SELECT 
-            "__KEY_links_u0",
-            "__FK_links_u0",
-            (SELECT 
-                "href" AS "href_u0",
-                "__FK_self_u0"
-            FROM "self" FK "__FK_self_u0"),
-            (SELECT 
-                "href" AS "href_u1",
-                "__FK_next"
-            FROM "next" FK "__FK_next")
-        FROM "links" PK "__KEY_links_u0" FK "__FK_links_u0")
-    FROM JSON (wrap on) "root" PK "__KEY_root"
-    WITH CONNECTION (  
-      URL "https://$(vu_tenant_fqdn)/api/v1/reloads?$(vParams)"
-    );
-
-	IF $(vIncrementalQVDsAvailable)=1 THEN
-    
-        [Reloads]:
-        LOAD	
-            [id] AS ReloadID,
-            [appId] AS AppID,
-            [userId] AS ReloadUserID,
-//             [userId] AS UserID,
-            [type] AS ReloadType,
-            [status] AS ReloadStatus,
-    //         [log] AS ReloadLog,
-    //         [duration] AS ReloadDuration,
-            endTime,
-            Interval(TimeStamp([endTime]) - TimeStamp([startTime]), 'hh:mm:ss') AS ReloadDuration,
-            TimeStamp([startTime]) AS ReloadStartDate,
-            Date(TimeStamp([creationTime])) AS ReloadCreationTime,
-            TimeStamp([startTime]) AS ReloadStartTime,
-            Hour(TimeStamp([startTime])) AS ReloadStartHour,
-            Minute(TimeStamp([startTime])) AS ReloadStartMinute,
-            TimeStamp([endTime]) AS ReloadEndTime,
-            TimeStamp([engineTime]) AS ReloadEngineTime
-        RESIDENT RestConnectorMasterTable
-        WHERE NOT IsNull([__FK_data])
-        AND Match(status,'SUCCEEDED','FAILED','CANCELED')
-        AND TimeStamp(endTime) >= TimeStamp('$(vIncrementalStartTime)')
-        AND TimeStamp(endTime) >= TimeStamp('$(v90BackGMT)');
-  
-        LET vCurrentRows = NoOfRows('Reloads');
-        
-        IF $(vCurrentRows) <> $(vRows) THEN
-        	LET vRows = $(vCurrentRows);
-            SET vContinue = 1;
-        ELSE
-        	IF $(vMaxAdditionalCalls) = $(vAdditionalCalls) THEN
-        		SET vContinue = 0;
-            ELSE
-            	LET vAdditionalCalls = $(vAdditionalCalls) + 1;
-            END IF
-        END IF
-        
-    ELSE
-    
-        [Reloads]:
-        LOAD	
-            [id] AS ReloadID,
-            [appId] AS AppID,
-            [userId] AS ReloadUserID,
-//             [userId] AS UserID,
-            [type] AS ReloadType,
-            [status] AS ReloadStatus,
-    //         [log] AS ReloadLog,
-    //         [duration] AS ReloadDuration,
-            endTime,
-            Interval(TimeStamp([endTime]) - TimeStamp([startTime]), 'hh:mm:ss') AS ReloadDuration,
-            TimeStamp([startTime]) AS ReloadStartDate,
-            Date(TimeStamp([creationTime])) AS ReloadCreationTime,
-            TimeStamp([startTime]) AS ReloadStartTime,
-            Hour(TimeStamp([startTime])) AS ReloadStartHour,
-            Minute(TimeStamp([startTime])) AS ReloadStartMinute,
-            TimeStamp([endTime]) AS ReloadEndTime,
-            TimeStamp([engineTime]) AS ReloadEngineTime
-        RESIDENT RestConnectorMasterTable
-        WHERE NOT IsNull([__FK_data])
-        AND Match(status,'SUCCEEDED','FAILED','CANCELED')
-        AND TimeStamp(endTime) >= TimeStamp('$(vInitialDaysBack)')
-        AND TimeStamp(endTime) >= TimeStamp('$(v90BackGMT)');
-        
-        LET vCurrentRows = NoOfRows('Reloads');
-        
-        IF $(vCurrentRows) <> $(vRows) THEN
-        	LET vRows = $(vCurrentRows);
-            SET vContinue = 1;
-        ELSE
-        	IF $(vMaxAdditionalCalls) = $(vAdditionalCalls) THEN
-        		SET vContinue = 0;
-            ELSE
-            	LET vAdditionalCalls = $(vAdditionalCalls) + 1;
-            END IF
-        END IF
-    
-    END IF
-
-    [NextURL]:
-    LOAD	
-        [href_u1] AS NextURL
-    RESIDENT RestConnectorMasterTable
-    WHERE NOT IsNull([__FK_next]);
-
-    DROP TABLE RestConnectorMasterTable;
-
-    LET vParams = SubField(Peek('NextURL',0,'NextURL'),'?',-1);
-    LET vNextURLRows = NoOfRows('NextURL');
-
-    DROP TABLE NextURL;
-    
-  LOOP WHILE $(vNextURLRows)>0 AND $(vContinue);
-  
-  DROP FIELD endTime;
-  
-  LET vNoOfReloads = NoOfRows('Reloads');
-  TRACE number of reloads: $(vNoOfReloads);
-
-  Map_All_Reload_Jobs:
-  MAPPING LOAD DISTINCT
-      ReloadID,
-      1
-  RESIDENT Reloads;
-
-END SUB
-///$tab Reload-Tasks
-SUB get_reload_tasks
-
-  SET vParams = 'limit=100';
-  LET vCounter = 0;
-
-  DO
-  
-  	LET vAPICallCounter = $(vAPICallCounter) + 1;
-
-    LIB CONNECT TO '$(vu_rest_connection)';
-
-    RestConnectorMasterTable:
-    SQL SELECT 
-        "__KEY_root",
-        (SELECT 
-            "id",
-            "type",
-            "active",
-            "appId",
-            "startDateTime",
-            "state",
-            "timeZone",
-            "nextExecutionTime",
-            "lastExecutionTime",
-            "__KEY_data",
-            "__FK_data",
-            (SELECT 
-                "@Value",
-                "__FK_recurrence"
-            FROM "recurrence" FK "__FK_recurrence" ArrayValueAlias "@Value"),
-            (SELECT 
-                "__KEY_links",
-                "__FK_links",
-                (SELECT 
-                    "href",
-                    "__FK_self"
-                FROM "self" FK "__FK_self")
-            FROM "links" PK "__KEY_links" FK "__FK_links")
-        FROM "data" PK "__KEY_data" FK "__FK_data"),
-        (SELECT 
-            "__KEY_links_u0",
-            "__FK_links_u0",
-            (SELECT 
-                "href" AS "href_u0",
-                "__FK_self_u0"
-            FROM "self" FK "__FK_self_u0"),
-            (SELECT 
-                "href" AS "href_u1",
-                "__FK_next"
-            FROM "next" FK "__FK_next")
-        FROM "links" PK "__KEY_links_u0" FK "__FK_links_u0")
-    FROM JSON (wrap on) "root" PK "__KEY_root"
-    WITH CONNECTION (  
-      URL "https://$(vu_tenant_fqdn)/api/v1/reload-tasks?$(vParams)"
-    );
-
-    [Recurrence]:
-    LOAD	
-    	[@Value] AS ReloadTaskRecurrence,
-        Capitalize(TextBetween([@Value],'FREQ=',';')) AS ReloadTaskRecurrenceRate,
-        [__FK_recurrence] & '|' & $(vCounter) & '|' & '$(vTenantID)' AS [__KEY_data]
-    RESIDENT RestConnectorMasterTable
-    WHERE NOT IsNull([__FK_recurrence]);
-
-    [ReloadTasks]:
-    LOAD	
-	  [id] AS ReloadTaskID,
-      [type] AS ReloadTaskType,
-      [active] AS ReloadTaskActive,
-      [appId] AS AppID,
-      Date(TimeStamp(TimeStamp([startDateTime]) + $(vReloadTimeDiffFromGMT))) AS ReloadTaskStartDateTime,
-      [state] AS ReloadTaskState,
-      [timeZone] AS ReloadTaskTimeZone,
-      Date(TimeStamp(TimeStamp([nextExecutionTime]) + $(vReloadTimeDiffFromGMT))) AS ReloadTaskNextExecutionTime,
-      Date(TimeStamp(TimeStamp([lastExecutionTime]) + $(vReloadTimeDiffFromGMT))) AS ReloadTaskLastExecutionTime,
-      [__KEY_data] & '|' & $(vCounter) & '|' & '$(vTenantID)' AS [__KEY_data]
-    RESIDENT RestConnectorMasterTable
-    WHERE NOT IsNull([__FK_data]);
-    
-    [NextURL]:
-    LOAD	
-        [href_u1] AS NextURL
-    RESIDENT RestConnectorMasterTable
-    WHERE NOT IsNull([__FK_next]);
-
-    DROP TABLE RestConnectorMasterTable;
-
-    LET vParams = SubField(Peek('NextURL',0,'NextURL'),'?',-1);
-    LET vNextURLRows = NoOfRows('NextURL');
-
-    DROP TABLE NextURL;
-    
-    LET vCounter = $(vCounter) + 1;
-
-  LOOP WHILE $(vNextURLRows)>0;
-  
-  LEFT JOIN (ReloadTasks)
-  LOAD * RESIDENT Recurrence;
-
-  RENAME TABLE ReloadTasks TO TEMP;
-  DROP TABLE Recurrence;
-  DROP FIELD [__KEY_data];
-
-  ReloadTasks:
-  LEFT KEEP(Apps)
-  LOAD * RESIDENT TEMP;
-
-  DROP TABLE TEMP;
-
-END SUB
-///$tab Trigger Audit Reloads
-SUB get_audit_reloads
-
-	// reload.ended event has been removed from all tenants, call finished directly
-    CALL get_audit_reloads_finished;
-
-END SUB
-///$tab Audit Reloads (.finished)
-SUB get_audit_reloads_finished
-
-    LET vCounter = 0;
-    LET vNextURL = '';
-    LET vUniqueKey = Num('$(reload_start)') & '$(vTenantID)';
-    
-    IF $(vIncrementalQVDsAvailable)=1 THEN
-    	LET vISO_8601_Date_Range = '&eventTime=' & Left(Date(TimeStamp('$(vIncrementalStartTime)'),'YYYY-MM-DD'),10) & 'T' & Right('0' & Timestamp('$(vIncrementalStartTime)','MM/DD/YYYY hh:mm:ss'),8) & 'Z/9999-01-01T00:00:00Z';
-    ELSE
-    	LET vISO_8601_Date_Range = '&eventTime=' & Left(Date(TimeStamp('$(vInitialDaysBack)'),'YYYY-MM-DD'),10) & 'T' & Right('0' & Timestamp('$(vInitialDaysBack)','MM/DD/YYYY hh:mm:ss'),8) & 'Z/9999-01-01T00:00:00Z';
-    END IF
-                
     DO
-    	LET vAPICallCounter = $(vAPICallCounter) + 1;
+
+        LET vAPICallCounter = $(vAPICallCounter) + 1;
 
         LIB CONNECT TO '$(vu_rest_connection)';
 
@@ -1282,1066 +600,684 @@ SUB get_audit_reloads_finished
         SQL SELECT 
             "__KEY_root",
             (SELECT 
-                "id",
-                "contentType",
-                "eventId",
-                "eventTime",
-                "eventType",
-                "eventTypeVersion",
-                "source",
+                "name" AS "name_u0",
+                "resourceCustomAttributes",
+                "resourceUpdatedAt",
+                "resourceType",
+                "resourceId",
+                "resourceCreatedAt",
+                "id" AS "id_u0",
+                "createdAt",
+                "updatedAt",
+                "creatorId",
+                "updaterId",
                 "tenantId",
-                "userId",
+                "isFavorited" AS "isFavorited_u0",
+                "ownerId" AS "ownerId_u0",
+                "description" AS "description_u0",
                 "__KEY_data",
                 "__FK_data",
                 (SELECT 
-                    "duration",
-                    "endTime",
-                    "endedWithMemoryConstraint",
-                    "isDirectQueryMode",
-                    "isPartialReload",
-                    "isSessionApp",
+                    "_resourcetype",
+                    "createdDate",
+                    "description",
+                    "dynamicColor",
+                    "hasSectionAccess",
+                    "id",
+                    "lastReloadTime",
+                    "modifiedDate",
                     "name",
-                    "peakMemoryBytes",
-                    "reloadId",
-                    "status",
-                    "usage",
-                    "__KEY_data_u0",
-                    "__FK_data_u0",
-                    (SELECT 
-                        "description",
-                        "error",
-                        "line",
-                        "lineNumber",
-                        "__FK_errors"
-                    FROM "errors" FK "__FK_errors"),
-                    (SELECT 
-                        "memory",
-                        "__FK_size"
-                    FROM "size" FK "__FK_size"),
-                    (SELECT 
-                        "@Value",
-                        "__FK_statements"
-                    FROM "statements" FK "__FK_statements" ArrayValueAlias "@Value"),
-                    (SELECT 
-                        "@Value" AS "@Value_u0",
-                        "__FK_warnings"
-                    FROM "warnings" FK "__FK_warnings" ArrayValueAlias "@Value_u0")
-                FROM "data" PK "__KEY_data_u0" FK "__FK_data_u0"),
-                (SELECT 
+                    "originAppId",
+                    "owner",
                     "ownerId",
-                    "topLevelResourceId",
+                    "publishTime",
+                    "published",
                     "spaceId",
-                    "__KEY_extensions",
-                    "__FK_extensions",
-                    (SELECT 
-                        "sub",
-                        "subType",
-                        "__FK_actor"
-                    FROM "actor" FK "__FK_actor")
-                FROM "extensions" PK "__KEY_extensions" FK "__FK_extensions"),
+                    "thumbnail",
+                    "encrypted",
+                    "__FK_resourceAttributes"
+                FROM "resourceAttributes" FK "__FK_resourceAttributes"),
                 (SELECT 
                     "__KEY_links",
-                    "__FK_links",
-                    (SELECT 
-                        "Href",
-                        "__FK_Self"
-                    FROM "Self" FK "__FK_Self"),
-                    (SELECT 
-                        "href",
-                        "__FK_self"
-                    FROM "self" FK "__FK_self")
-                FROM "links" PK "__KEY_links" FK "__FK_links")
+                    "__FK_links"
+                FROM "links" PK "__KEY_links" FK "__FK_links"),
+                (SELECT 
+                    "__KEY_meta",
+                    "__FK_meta"
+                FROM "meta" PK "__KEY_meta" FK "__FK_meta")
             FROM "data" PK "__KEY_data" FK "__FK_data"),
             (SELECT 
-                "Prev",
                 "__KEY_links_u0",
                 "__FK_links_u0",
                 (SELECT 
-                    "Href" AS "Href_u0",
-                    "__FK_Self_u0"
-                FROM "Self" FK "__FK_Self_u0"),
-                (SELECT 
-                    "Href" AS "Href_u1",
-                    "__FK_Next"
-                FROM "Next" FK "__FK_Next"),
-                (SELECT 
-                    "href" AS "href_u0",
-                    "__FK_self_u0"
-                FROM "self" FK "__FK_self_u0"),
-                (SELECT 
-                    "href" AS "href_u1",
+                    "href" AS "href_u4",
                     "__FK_next"
                 FROM "next" FK "__FK_next")
             FROM "links" PK "__KEY_links_u0" FK "__FK_links_u0")
         FROM JSON (wrap on) "root" PK "__KEY_root"
         WITH CONNECTION (  
-            URL "https://$(vu_tenant_fqdn)/api/v1/audits?limit=$(vu_audit_page_size)&sort=-eventTime&source=com.qlik/engine&eventType=com.qlik.v1.app.reload.finished$(vISO_8601_Date_Range)$(vNextURL)"
+          URL "https://$(vu_tenant_fqdn)/api/v1/items?$(vParams)"
         );
-        
-        [AuditReload]:
+
+
+        [Apps]:
         LOAD	
-            Interval(Round(duration/1000)/(60*60*24),'hh:mm:ss') AS ReloadDuration,
-            TimeStamp([endTime]) AS ReloadEndTime,
-            Date(TimeStamp([endTime]) - (Round(duration/1000)/(60*60*24))) AS ReloadStartDate,
-            TimeStamp(Date(TimeStamp([endTime]) - (Round(duration/1000)/(60*60*24)))) AS ReloadStartTime,
-            Hour(TimeStamp(Date(TimeStamp([endTime]) - (Round(duration/1000)/(60*60*24))))) AS ReloadStartHour,
-            Minute(TimeStamp(Date(TimeStamp([endTime]) - (Round(duration/1000)/(60*60*24))))) AS ReloadStartMinute,
-            Null() AS ReloadEngineTime,
-            Round([peakMemoryBytes] / 1024 / 1024, 1) AS ReloadPeakReloadRAM_MB,
-            Round([peakMemoryBytes] / 1024 / 1024 / 1024, 1) AS ReloadPeakReloadRAM_GB,
-            [reloadId] AS ReloadID,
-            'in app' AS ReloadType,
-            Pick(Match([status],'ok','error'),'SUCCEEDED','FAILED') AS ReloadStatus,
-            [__KEY_data_u0] & '|' & $(vCounter) & '|' & '$(vUniqueKey)' AS [_AuditReloadKey],
-            [__FK_data_u0] & '|' & $(vCounter) & '|' & '$(vTenantID)' AS [__KEY_data]
+            Dual([name_u0],AutoNumber([resourceId])) AS AppName,
+            // [resourceCustomAttributes],
+            // [resourceUpdatedAt],
+            // [resourceType],
+            [resourceId] AS AppID,
+            TimeStamp([resourceCreatedAt]) AS AppCreatedTime,
+            // [id_u0] AS [id_u0],
+            // [createdAt],
+            TimeStamp([updatedAt]) AS AppUpdatedTime,
+            [creatorId] AS AppCreatorID,
+            [updaterId] AS AppUpdaterID,
+            // [tenantId],
+            [isFavorited_u0] AS AppIsFavorited,
+            [ownerId_u0] AS AppOwnerID,
+            [description_u0] AS AppDescription,
+            If([resourceType]='app','QS','QV') AS AppType
         RESIDENT RestConnectorMasterTable
-        WHERE NOT IsNull([__FK_data_u0])
-        AND (ApplyMap('Map_All_Reload_Jobs',reloadId)=1 OR SubStringCount(reloadId,'-')>0);
-                                
-        [AuditReloadErrors]:
+        WHERE NOT IsNull([__FK_data])
+        AND Len(Trim(resourceId))>=1 AND Len(Trim(name_u0))>=1;
+
+        AppDetails:
         LOAD	
-            [description] AS ReloadErrorDescription,
-            [error] AS ReloadError,
-            [line] AS ReloadLine,
-            [lineNumber] AS ReloadLineNumber,
-            [__FK_errors] & '|' & $(vCounter) & '|' & '$(vUniqueKey)' AS [_AuditReloadKey]
+            // [_resourcetype],
+            // [createdDate],
+            // [description],
+            // [dynamicColor],
+            [hasSectionAccess] AS AppHasSectionAccess,
+            [id] AS AppID,
+            TimeStamp([lastReloadTime]) AS AppLastReloadTime,
+            // [modifiedDate],
+            // [name],
+            [originAppId] AS AppOriginalID,
+            // [owner] AS AppOwnerName, // removing due to deprecation of field
+            // [ownerId],
+            If([published]='True',1,0) AS AppIsDistributed,
+//             TimeStamp([publishTime]) AS AppPublishedTime,
+            spaceId AS SpaceID,
+            // [thumbnail],
+            [encrypted] AS AppEncrypted
         RESIDENT RestConnectorMasterTable
-        WHERE NOT IsNull([__FK_errors]);
+        WHERE NOT IsNull([__FK_resourceAttributes])
+        AND Len(Trim(id))>=1
+        AND ApplyMap('AllSpacesMap',spaceId)=1;
 
-        [AuditReloadBaseRAMFootprint]:
+        NextURL:
         LOAD	
-            [memory] AS BaseRAMFootprint,
-            [__FK_size] & '|' & $(vCounter) & '|' & '$(vUniqueKey)' AS [_AuditReloadKey]
-        RESIDENT RestConnectorMasterTable
-        WHERE NOT IsNull([__FK_size]);
-
-        // [warnings]:
-        // LOAD	[@Value],
-        // 	[__FK_warnings] AS [_AuditReloadKey]
-        // RESIDENT RestConnectorMasterTable
-        // WHERE NOT IsNull([__FK_warnings]);
-
-//         [AuditReloadLineageTemp]:
-//         LOAD DISTINCT
-// //             [connection],
-//             If([storageProvider]='endpoints','[Unknown Endpoints Connection]',[connectionId]) AS DataConnectionID,
-//             If([storageProvider]='endpoints','[Unknown Endpoints Connection]',[connectionId]) AS ReloadConnectionID,
-//         // 	[dataSize],
-//             [discriminator],
-//         // 	[duration],
-//         // 	[nbrOfFields],
-//         // 	[nbrOfRows],
-//         // 	[statement],
-//        	 	[storageProvider] AS ReloadConnectionStorageProvider,
-//             [type] AS ReloadConnectionType,
-// //             [type],
-//             [__FK_statements] & '|' & $(vCounter) & '|' & '$(vUniqueKey)' AS [_AuditReloadKey]
-//         RESIDENT RestConnectorMasterTable
-//         WHERE NOT IsNull([__FK_statements])
-//         AND (Len(connectionId)>=1 OR [storageProvider]='endpoints');
-        
-        [AuditReloadAppID]:
-        LOAD	
-            [topLevelResourceId] AS AppID,
-            [__FK_extensions] & '|' & $(vCounter) & '|' & '$(vTenantID)' AS [__KEY_data]
-        RESIDENT RestConnectorMasterTable
-        WHERE NOT IsNull([__FK_extensions]);
-        
-        // [Self]:
-        // LOAD	[Href],
-        // 	[__FK_Self] AS [__KEY_links]
-        // RESIDENT RestConnectorMasterTable
-        // WHERE NOT IsNull([__FK_Self]);
-
-
-        // [links]:
-        // LOAD	[__KEY_links],
-        // 	[__FK_links] AS [__KEY_data]
-        // RESIDENT RestConnectorMasterTable
-        // WHERE NOT IsNull([__FK_links]);
-
-        [AuditReload2]:
-        LOAD	
-            [userId] AS ReloadUserID,
-            [__KEY_data] & '|' & $(vCounter) & '|' & '$(vTenantID)' AS [__KEY_data]
-        RESIDENT RestConnectorMasterTable
-        WHERE NOT IsNull([__FK_data]);
-
-        [NextURL]:
-        LOAD	
-            [href_u1] AS NextURL
+            [href_u4] AS NextURL
         RESIDENT RestConnectorMasterTable
         WHERE NOT IsNull([__FK_next]);
 
         DROP TABLE RestConnectorMasterTable;
 
-        LET vNextURL = TextBetween(Peek('NextURL',0,'NextURL'),'&next=',Null());
-        
-        IF SubStringCount('$(vNextURL)','&') >= 1 THEN
-            LET vNextURL = TextBetween('$(vNextURL)',Null(),'&');
-        END IF
-
-        LET vNextURL = '&next=' & '$(vNextURL)';
-
+        LET vParams = SubField(Peek('NextURL',0,'NextURL'),'?',-1);
         LET vNextURLRows = NoOfRows('NextURL');
 
         DROP TABLE NextURL;
-        
-        LET vCounter = $(vCounter) + 1;
-        
+
     LOOP WHILE $(vNextURLRows)>0;
 
-    IF NoOfRows('AuditReload') > 0 THEN
+    AllAppsMap:
+    MAPPING LOAD DISTINCT
+      AppID,
+      1
+    RESIDENT Apps;
+
+    INNER JOIN(Apps)
+    LOAD * RESIDENT AppDetails;
+
+    DROP TABLE AppDetails;
     
-    	// JOIN APP ID
-        LEFT JOIN(AuditReload)
-        LOAD 
-        	*
-        RESIDENT AuditReloadAppID;
-        
-        DROP TABLE AuditReloadAppID;
-        
-        RENAME TABLE AuditReload TO TEMP;
-        
-        AuditReload:
-        LOAD
-        	*,
-            AppID & '|' & Num(ReloadEndTime) AS MaxReloadKey
-        RESIDENT TEMP;
-        
-        DROP TABLE TEMP;
+    AppSharesLink:
+    LOAD DISTINCT
+    	SpaceID & '|' AS _SpaceAppKey,
+        SpaceID,
+        AppID
+    RESIDENT Apps;
     
-        Map_MaxReloadKey:
-        MAPPING LOAD DISTINCT
-            AppID & '|' & Num(MaxReloadEndTime) AS MaxReloadKey,
-            1
-            ;
-        LOAD
-            Max(ReloadEndTime) AS MaxReloadEndTime,
-            AppID
-        RESIDENT AuditReload
-        GROUP BY AppID;
-        
-        MostRecentAppReloads:
-        NOCONCATENATE
-        LOAD DISTINCT
-            _AuditReloadKey,
-            ReloadID,
-            AppID
-        RESIDENT AuditReload
-        WHERE ApplyMap('Map_MaxReloadKey',MaxReloadKey)=1
-        AND NOT WildMatch(AppID,'SessionApp_*');
-        
-        Map__AuditReloadKey:
-        MAPPING LOAD DISTINCT
-            _AuditReloadKey,
-            1
-        RESIDENT MostRecentAppReloads;
-       
-        Map__AuditReloadKey_AppID:
-        MAPPING LOAD DISTINCT
-            _AuditReloadKey,
-            AppID
-        RESIDENT AuditReload;
-        
-        Map___KEY_data_UserID:
-        MAPPING LOAD DISTINCT
-        	__KEY_data,
-            ReloadUserID
-        RESIDENT AuditReload2;
-        
-        Map__AuditReloadKey__KEY_data:
-        MAPPING LOAD DISTINCT
-        	_AuditReloadKey,
-        	__KEY_data
-        RESIDENT AuditReload;
-        
-        /////////////////////////////////////////////////////////////////////
-        // LOOP OVER THE MOST RECENT OF EACH APP'S RELOAD TO GRAB THE LINEAGE
-        /////////////////////////////////////////////////////////////////////
-        
-        FOR i=0 TO NoOfRows('MostRecentAppReloads')-1
-        
-        	LET vCurrentAuditReloadKey = Peek('_AuditReloadKey',$(i),'MostRecentAppReloads');
-            LET vCurrentReloadID = Peek('ReloadID',$(i),'MostRecentAppReloads');
-        	LET vCurrentAppID = Peek('AppID',$(i),'MostRecentAppReloads');
-            
-            // CHECK IF APP EXISTS
-            
-            LET vAPICallCounter = $(vAPICallCounter) + 1;        
+    DROP FIELD SpaceID FROM Apps;
+
+END SUB
+///$tab Space Types
+SUB get_space_types
+
+    LET vAPICallCounter = $(vAPICallCounter) + 1;
+
+    LIB CONNECT TO '$(vu_rest_connection)';
+
+    RestConnectorMasterTable:
+    SQL SELECT 
+        "@Value"
+    FROM JSON (wrap off) "data" ArrayValueAlias "@Value"
+    WITH CONNECTION (  
+      URL "https://$(vu_tenant_fqdn)/api/v1/spaces/types"
+    );
+
+    [SpaceTypes]:
+    LOAD	
+        Capitalize([@Value]) AS SpaceType
+    RESIDENT RestConnectorMasterTable;
+
+    DROP TABLE RestConnectorMasterTable;
+
+END SUB
+///$tab Space Role Mapping
+SUB space_role_mapping
+
+    Map_Temp_SpaceRole_SpaceRoleName:
+    MAPPING LOAD
+        SpaceAssignmentRoleSpaceType & '|' & RoleNameRaw AS SpaceAssignmentRoleSpaceTypeKey,
+        RoleNameUI
+    INLINE [
+        SpaceAssignmentRoleSpaceType	,RoleNameRaw		,RoleNameUI			
+        Shared							,consumer			,Can view			
+        Managed							,consumer			,Can view			
+        Data							,consumer			,Can view
+        Data							,datapreview		,Can view data
+        Shared							,dataconsumer		,Can consume data	
+        Managed							,dataconsumer		,Can consume data	
+        Data							,dataconsumer		,Can consume data	
+        Managed							,facilitator		,Can manage			
+        Data							,facilitator		,Can manage			
+        Shared							,facilitator		,Can manage			
+        Shared							,producer			,Can edit			
+        Data							,producer			,Can edit			
+        Managed							,contributor		,Can contribute		
+        Managed							,publisher			,Can publish		
+        Data							,operator			,Can operate
+        Managed							,operator			,Can operate
+        Shared							,Owner				,Owner				
+        Managed							,Owner				,Owner				
+        Data							,Owner				,Owner
+        Shared							,codeveloper		,Can edit data in apps
+        Managed							,basicconsumer		,Has restricted view
+    ];
+    
+    [SpaceRole_SpaceRoleName]:
+    LOAD * INLINE [
+    	SpaceAssignmentRoleSpaceType,RoleNameRaw,SpaceAssignmentRoleSpaceTypeKey,RoleNameUI
+    ];
+
+    FOR EACH spaceType in FieldValueList('SpaceType')
+
+        LET vSpaceID = Lookup('SpaceID', 'SpaceType', '$(spaceType)', 'Spaces');
+
+        IF Len('$(vSpaceID)') > 0 THEN
+
+            LET vAPICallCounter = $(vAPICallCounter) + 1;
+
             LIB CONNECT TO '$(vu_rest_connection)';
 
             RestConnectorMasterTable:
             SQL SELECT 
                 "__KEY_root",
                 (SELECT 
-                    "resourceId",
-                    "__KEY_data",
-                    "__FK_data"
-                FROM "data" PK "__KEY_data" FK "__FK_data")
+                    "__FK_meta",
+                    "__KEY_meta",
+                    (SELECT 
+                        "@Value" AS "@Value_u1",
+                        "__FK_assignableRoles"
+                    FROM "assignableRoles" FK "__FK_assignableRoles" ArrayValueAlias "@Value_u1")
+                FROM "meta" PK "__KEY_meta" FK "__FK_meta")
             FROM JSON (wrap on) "root" PK "__KEY_root"
             WITH CONNECTION (  
-                URL "https://$(vu_tenant_fqdn)/api/v1/items?resourceType=app&resourceId=$(vCurrentAppID)"
+              URL "https://$(vu_tenant_fqdn)/api/v1/spaces/$(vSpaceID)"
             );
 
-            [CheckAppExists]:
-            LOAD	
-                [resourceId]
+            CONCATENATE(SpaceRole_SpaceRoleName)
+            LOAD
+                '$(spaceType)' AS SpaceAssignmentRoleSpaceType,
+                [@Value_u1] AS RoleNameRaw,
+                '$(spaceType)' & '|' & [@Value_u1] AS SpaceAssignmentRoleSpaceTypeKey,
+                ApplyMap('Map_Temp_SpaceRole_SpaceRoleName','$(spaceType)' & '|' & [@Value_u1],[@Value_u1] & ' (UI name unknown)') AS RoleNameUI
             RESIDENT RestConnectorMasterTable
-            WHERE NOT IsNull([__FK_data]);
-
-			DROP TABLE RestConnectorMasterTable;
+            WHERE NOT IsNull([__FK_assignableRoles])
+            AND NOT ([@Value_u1]='publisher' AND '$(spaceType)'='Data');
             
-            IF NoOfRows('CheckAppExists') > 0 THEN
+            CONCATENATE(SpaceRole_SpaceRoleName)
+            LOAD
+                '$(spaceType)' AS SpaceAssignmentRoleSpaceType,
+                '$(spaceType)|Owner' AS SpaceAssignmentRoleSpaceTypeKey,
+                'Owner' AS RoleNameRaw,
+           		'Owner' AS RoleNameUI
+            AUTOGENERATE 1;
 
-                LET vAPICallCounter = $(vAPICallCounter) + 1;
-                LIB CONNECT TO '$(vu_rest_connection)';
+            DROP TABLE RestConnectorMasterTable;
 
-                RestConnectorMasterTable:
-                SQL SELECT 
-                    "reloadId",
-                    "success",
-                    "duration" AS "duration_u0",
-                    "endTime",
-                    "loadDataFilesBytes",
-                    "loadFilesBytes",
-                    "loadExternalBytes",
-                    "storeFilesBytes",
-                    "storeDataFilesBytes",
-                    "isPartialReload",
-                    "__KEY_data",
-                    (SELECT 
-                        "type",
-                        "connectionId",
-                        "connection",
-                        "duration",
-                        "dataSize",
-                        "nbrOfFields",
-                        "nbrOfRows",
-                        "qri",
-                        "label",
-                        "tableName",
-                        "partialReloadOperation",
-                        "__FK_statements"
-                    FROM "statements" FK "__FK_statements")
-                FROM JSON (wrap off) "data" PK "__KEY_data"
-                WITH CONNECTION (  
-                    URL "https://$(vu_tenant_fqdn)/api/v1/apps/$(vCurrentAppID)/reloads/metadata/$(vCurrentReloadID)"
-                );
+        END IF
 
-                [AuditReloadLineageTemp]:
-                LOAD	
-                    '$(vCurrentAuditReloadKey)' AS [_AuditReloadKey],
-                    If([connection]='endpoints','[Unknown Endpoints Connection]',ApplyMap('Map_DataConnectionID_DataConnectionType',[connectionId])) AS ReloadConnectionStorageProvider,
-                    If([connection]='endpoints','[Unknown Endpoints Connection]',[connectionId]) AS DataConnectionID,
-            		If([connection]='endpoints','[Unknown Endpoints Connection]',[connectionId]) AS ReloadConnectionID,
-                    [type] AS ReloadConnectionType,
-    //                 [reloadId],
-    //                 [connectionId],
-    //                 [connection],
-    //                 [duration],
-    //                 [dataSize],
-    //                 [nbrOfFields],
-    //                 [nbrOfRows],
-    //                 [qri],
-                    [label]
-//                     tableName AS ReloadConnectionTableName
-    //                 [partialReloadOperation],
-    //                 [__FK_statements] AS [__KEY_data]
-                RESIDENT RestConnectorMasterTable
-                WHERE NOT IsNull([__FK_statements]);
-
-    //             [data]:
-    //             LOAD	
-    //             	[reloadId],
-    //                 [success],
-    //                 [duration_u0] AS [duration_u0],
-    //                 [endTime],
-    //                 [loadDataFilesBytes],
-    //                 [loadFilesBytes],
-    //                 [loadExternalBytes],
-    //                 [storeFilesBytes],
-    //                 [storeDataFilesBytes],
-    //                 [isPartialReload],
-    //                 [__KEY_data]
-    //             RESIDENT RestConnectorMasterTable
-    //             WHERE NOT IsNull([__KEY_data]);
-
-    //             [AuditReloadLineageTemp]:
-    //             LOAD DISTINCT
-    //     //             [connection],
-    //                 If([storageProvider]='endpoints','[Unknown Endpoints Connection]',[connectionId]) AS DataConnectionID,
-    //                 If([storageProvider]='endpoints','[Unknown Endpoints Connection]',[connectionId]) AS ReloadConnectionID,
-    //             // 	[dataSize],
-    //                 [discriminator],
-    //             // 	[duration],
-    //             // 	[nbrOfFields],
-    //             // 	[nbrOfRows],
-    //             // 	[statement],
-    //                 [storageProvider] AS ReloadConnectionStorageProvider,
-    //                 [type] AS ReloadConnectionType,
-    //     //             [type],
-    //                 [__FK_statements] & '|' & $(vCounter) & '|' & '$(vUniqueKey)' AS [_AuditReloadKey]
-    //             RESIDENT RestConnectorMasterTable
-    //             WHERE NOT IsNull([__FK_statements])
-    //             AND (Len(connectionId)>=1 OR [storageProvider]='endpoints');
-
-                DROP TABLE RestConnectorMasterTable;
-                
-            END IF;
-            
-            DROP TABLE CheckAppExists;
-
-        NEXT i;
-        
-        DROP TABLE MostRecentAppReloads;
-        
-        
-        /////////////////////////////////////////////////////////////////////
-        /////////////////////////////////////////////////////////////////////
-        
-        AuditReloadLineage:
-        LOAD DISTINCT
-        	*,
-            FileName&'|'&DataConnectionID AS FileNameUnique
-            ;
-        LOAD DISTINCT
-            *,
-            If(ApplyMap('Map_FileExtensions',Lower(Subfield(label,'.',-1)))=1,Lower(Subfield(label,'.',-1))) AS FileType,
-            If(ApplyMap('Map_FileExtensions',Lower(Subfield(label,'.',-1)))=1,Lower(Mid(label,Index(label,'/',-1)+1,Index(label,'.',-1)-Index(label,'/',-1)-1))) AS FileName,
-            ReloadConnectionStorageProvider AS ReloadDataConnectionType
-        RESIDENT AuditReloadLineageTemp;
-        
-//         Map__AuditReloadKey_ReloadDataConnectionType:
-//         MAPPING LOAD DISTINCT
-//         	_AuditReloadKey,
-//             ReloadDataConnectionType
-//         RESIDENT AuditReloadLineage;
-        
-        LEFT JOIN (AuditReload)
-        LOAD * RESIDENT AuditReload2;
-
-        LEFT JOIN (AuditReload)
-        LOAD * RESIDENT AuditReloadBaseRAMFootprint;
-
-        DROP FIELDS //discriminator
-        			label
-                    ,MaxReloadKey
-                    ,__KEY_data
-                    ;
-
-        DROP TABLES AuditReload2
-                    ,AuditReloadBaseRAMFootprint
-                    ,AuditReloadLineageTemp
-                    ;
-        
-        RENAME TABLE AuditReloadLineage TO TEMP;
-        
-        AuditReloadLineage:
-        LEFT KEEP(AuditReload)
-        LOAD 
-        	*
-        RESIDENT TEMP;
-        
-        DROP TABLE TEMP;
-        
-        RENAME TABLE AuditReloadErrors TO TEMP;
-        
-        AuditReloadErrors:
-        LEFT KEEP(AuditReload)
-        LOAD * RESIDENT TEMP;
-        
-        DROP TABLE TEMP;
-            
-        // COMBINE MODELS
-        LEFT JOIN(Reloads)
-        LOAD DISTINCT
-        	_AuditReloadKey,
-            ReloadID,
-            ReloadPeakReloadRAM_GB,
-            ReloadPeakReloadRAM_MB,
-            BaseRAMFootprint
-        RESIDENT AuditReload;
-        	
-        CONCATENATE(Reloads)
-        LOAD DISTINCT
-        	*
-        RESIDENT AuditReload
-        WHERE ApplyMap('Map_All_Reload_Jobs',ReloadID)<>1
-        AND SubStringCount(ReloadID,'-')>0;
-        
-        DROP TABLE AuditReload;
-        
-        Map_NewAuditReloadIDs:
-        MAPPING LOAD DISTINCT
-        	AppID,
-            1
-        RESIDENT Reloads;
-        
-        DROP FIELD ReloadDataConnectionType;
-
-	ELSE
+    NEXT spaceType
     
-        TRACE There are no reloads in this tenant yet. Dropping all tables and halting...;
-
-        LET vNumTables = NoOfTables();
-
-        FOR i = NoOfTables() - 1 TO 0 STEP - 1
-            LET vTable = TableName($(i));
-            TRACE Dropping table '$(vTable)';
-            DROP TABLES [$(vTable)];
-        NEXT
-
-        TRACE All finished. Please try reloading again.;
-
-        exit script;
-      
-    END IF
+    DROP TABLE SpaceTypes;
+    
+    Map_SpaceRoleKey_SpaceRoleName:
+    MAPPING LOAD DISTINCT
+    	SpaceAssignmentRoleSpaceTypeKey,
+        RoleNameUI
+    RESIDENT SpaceRole_SpaceRoleName;
 
 END SUB
-///$tab Incremental
-// For loading a table from QVD ///////////////////
-SUB incremental
-    
-    If $(vIncrementalQVDsAvailable)=1 THEN
-    
-        LET qvd_name = '$(vOutputQVDName(Reloads,$(app_version)))';
 
-        TRACE Looking to load: $(qvd_name).;
-        LET file_size = If(IsNull(FileSize('$(qvd_name)')),0,FileSize('$(qvd_name)'));
 
-        IF file_size > 0 THEN
-            TRACE File size is $(file_size) bytes;
-            TRACE Fetching data from: $(qvd_name);
-            
-            Map__AuditReloadKey_AppID_FromQVD:
-            MAPPING LOAD DISTINCT
-                _AuditReloadKey,
-                AppID
-            FROM '$(qvd_name)'(qvd);
-            
-            Map__AuditReloadKey_ReloadEndTime_FromQVD:
-            MAPPING LOAD DISTINCT
-                _AuditReloadKey,
-                ReloadEndTime
-            FROM '$(qvd_name)'(qvd);
-            
-            Reloads:
-            LOAD DISTINCT 
-                * 
-            FROM '$(qvd_name)'(qvd)
-            WHERE ReloadEndTime >= Date('$(vMaxReloadAge)')
-            AND NOT EXISTS(ReloadID);
-            
-            Map_AuditReloadKey_ReloadID:
-            MAPPING LOAD DISTINCT
-            	_AuditReloadKey,
-                1
-            RESIDENT Reloads;
 
-        ELSE
-            TRACE Could not find file: $(qvd_name).;
-        END IF
-            
-        LET qvd_name = '$(vOutputQVDName(AuditReloadLineage,$(app_version)))';
+///$tab Space Assignments
+SUB get_space_assignments
+  
+  [SpaceAssignments]:
+  LOAD * INLINE [SpaceID];
+  
+  SpaceAssignmentRoles:
+  LOAD * INLINE [
+  	SpaceAssignmentRole,_KeySpaceRoleAssignment
+  ];
+  
+  FOR i=0 TO NoOfRows('Spaces')-1
+  
+  		SET vParams = 'limit=100';
+  		
+		LET vSpaceID = Peek('SpaceID',$(i),'Spaces');
 
-        TRACE Looking to load: $(qvd_name).;
-        LET file_size = If(IsNull(FileSize('$(qvd_name)')),0,FileSize('$(qvd_name)'));
+      	DO
 
-        IF file_size > 0 THEN
-            TRACE File size is $(file_size) bytes;
-            TRACE Fetching data from: $(qvd_name);
+          LET vAPICallCounter = $(vAPICallCounter) + 1;
 
-            AuditReloadLineage:
-            LOAD DISTINCT 
-                * 
-            FROM '$(qvd_name)'(qvd)
-            WHERE ApplyMap('Map_NewAuditReloadIDs',ApplyMap('Map__AuditReloadKey_AppID_FromQVD',_AuditReloadKey))<>1
-            AND ApplyMap('Map__AuditReloadKey_ReloadEndTime_FromQVD',_AuditReloadKey) >= Date('$(vMaxReloadAge)')
-            AND ApplyMap('Map_AuditReloadKey_ReloadID',_AuditReloadKey,'None')=1;
+          LIB CONNECT TO '$(vu_rest_connection)';
 
-        ELSE
-            TRACE Could not find file: $(qvd_name).;
-        END IF
-        
-        LET qvd_name = '$(vOutputQVDName(AuditReloadErrors,$(app_version)))';
+          RestConnectorMasterTable:
+          SQL SELECT 
+              "__KEY_root",
+              (SELECT 
+                  "id",
+                  "type",
+                  "assigneeId",
+                  "spaceId",
+                  "tenantId",
+                  "createdAt",
+                  "createdBy",
+                  "updatedAt",
+                  "__KEY_data",
+                  "__FK_data",
+                  (SELECT 
+                      "@Value",
+                      "__FK_roles"
+                  FROM "roles" FK "__FK_roles" ArrayValueAlias "@Value")
+              FROM "data" PK "__KEY_data" FK "__FK_data"),
+              (SELECT 
+                  "__FK_links_u0",
+                  "__KEY_links_u0",
+                  (SELECT 
+                      "href" AS "href_u2",
+                      "__FK_next"
+                  FROM "next" FK "__FK_next")
+              FROM "links" PK "__KEY_links_u0" FK "__FK_links_u0")
+          FROM JSON (wrap on) "root" PK "__KEY_root"
+          WITH CONNECTION (  
+            URL "https://$(vu_tenant_fqdn)/api/v1/spaces/$(vSpaceID)/assignments?$(vParams)"
+          );
 
-        TRACE Looking to load: $(qvd_name).;
-        LET file_size = If(IsNull(FileSize('$(qvd_name)')),0,FileSize('$(qvd_name)'));
+          CONCATENATE (SpaceAssignments)
+          LOAD	
+//           	  [id],
+//               [type],
+//               [assigneeId],
+              If([type]='user',[assigneeId]) AS UserIDTemp,
+              If([type]='group',[assigneeId]) AS GroupID,
+              [spaceId] AS SpaceID,
+			  spaceId & '|' AS _SpaceAppKey,
+              'Space' AS SpaceRoleAssignmentTypeLevel,
+              ApplyMap('Map_SpaceID_SpaceType',[spaceId]) AS SpaceAssignmentRoleSpaceType,
+//               [tenantId],
+//               [createdAt],
+//               [createdBy],
+//               [updatedAt],
+              [__KEY_data] & '|' & '$(vAPICallCounter)' AS _KeySpaceRoleAssignment
+//               [__FK_data] AS [__KEY_root]
+          RESIDENT RestConnectorMasterTable
+          WHERE NOT IsNull([__FK_data]);
 
-        IF file_size > 0 THEN
-            TRACE File size is $(file_size) bytes;
-            TRACE Fetching data from: $(qvd_name);
+          CONCATENATE(SpaceAssignmentRoles)
+          LOAD	
+          	  ApplyMap('Map_SpaceRoleKey_SpaceRoleName',
+              		Lookup('SpaceAssignmentRoleSpaceType','_KeySpaceRoleAssignment',[__FK_roles] & '|' & '$(vAPICallCounter)','SpaceAssignments') & '|' & Trim([@Value])
+                    ) AS SpaceAssignmentRole,
+              [__FK_roles] & '|' & '$(vAPICallCounter)' AS _KeySpaceRoleAssignment
+          RESIDENT RestConnectorMasterTable
+          WHERE NOT IsNull([__FK_roles]);
+          
 
-            AuditReloadErrors:
-            LOAD DISTINCT 
-                * 
-            FROM '$(qvd_name)'(qvd)
-            WHERE ApplyMap('Map__AuditReloadKey_ReloadEndTime_FromQVD',_AuditReloadKey) >= Date('$(vMaxReloadAge)')
-            AND ApplyMap('Map_AuditReloadKey_ReloadID',_AuditReloadKey,'None')=1;
+          NextURL:
+          LOAD	
+              [href_u2] AS NextURL
+          RESIDENT RestConnectorMasterTable
+          WHERE NOT IsNull([__FK_next]);
 
-        ELSE
-            TRACE Could not find file: $(qvd_name).;
-        END IF
-            
-    END IF
-    
-    // Create map later for OEM Dashboard support
-    Map_ReloadID_TenantID:
-    LOAD DISTINCT
-        ReloadID,
-        '$(vTenantID)' AS TenantID
-    RESIDENT Reloads;
+          DROP TABLE RestConnectorMasterTable;
 
-    IF NoOfRows('Reloads')>0 THEN
-    	FOR EACH data_table IN 'Reloads','AuditReloadLineage','AuditReloadErrors'
-        	LET qvd_name = '$(vOutputQVDName($(data_table),$(app_version)))';
-        	STORE $(data_table) INTO '$(qvd_name)'(qvd);
-            LET file_size_$(data_table) = FileSize('$(qvd_name)');
-        NEXT data_table
-    END IF
-    
+          LET vParams = SubField(Peek('NextURL',0,'NextURL'),'?',-1);
+          LET vNextURLRows = NoOfRows('NextURL');
+
+          DROP TABLE NextURL;
+
+        LOOP WHILE $(vNextURLRows)>0;
+      
+    NEXT i
   
 END SUB
-///$tab DC & Space Names
-SUB conns_and_spaces_names
-    IF NoOfRows('AuditReloadLineage')>0 THEN
+
+
+
+
+
+
+///$tab App Shares
+SUB get_app_shares
+
+    [AppShares]:
+    LOAD * INLINE [
+    	AppShareID,_AppShareKey,AppShareAssigneeID,AppShareGroupID,AppShareSpaceType,AppShareGroupName,AppShareSpaceID,AppShareAppID
+    ];
     
-        Map__AuditReloadKey_ReloadUserID:
-        MAPPING LOAD DISTINCT
-        	_AuditReloadKey,
-        	ReloadUserID
-        RESIDENT Reloads;
+    AppShareRoles:
+    LOAD * INLINE [
+    	AppShareRole,_AppShareKey
+    ];
     
-    	RENAME TABLE AuditReloadLineage TO TEMP;
+    FOR EACH spaceID in FieldValueList('SpaceID')
+    
+    	SET vParams = 'limit=100&resourceType=app';
+
+        DO
+
+          LET vAPICallCounter = $(vAPICallCounter) + 1;
+
+          LIB CONNECT TO '$(vu_rest_connection)';
+
+          RestConnectorMasterTable:
+          SQL SELECT 
+              "__KEY_root",
+              (SELECT 
+                  "id",
+                  "type",
+                  "assigneeId",
+                  "spaceId",
+                  "spaceType",
+                  "tenantId",
+                  "createdAt",
+                  "updatedAt",
+                  "createdBy",
+                  "updatedBy",
+                  "resourceType",
+                  "resourceId",
+                  "resourceName",
+                  "__KEY_data",
+                  "__FK_data",
+                  (SELECT 
+                      "@Value",
+                      "__FK_roles"
+                  FROM "roles" FK "__FK_roles" ArrayValueAlias "@Value")
+              FROM "data" PK "__KEY_data" FK "__FK_data"),
+              (SELECT 
+                  "__FK_links_u0",
+                  "__KEY_links_u0",
+                  (SELECT 
+                      "href" AS "href_u2",
+                      "__FK_next"
+                  FROM "next" FK "__FK_next")
+              FROM "links" PK "__KEY_links_u0" FK "__FK_links_u0")
+          FROM JSON (wrap on) "root" PK "__KEY_root"
+          WITH CONNECTION (  
+            URL "https://$(vu_tenant_fqdn)/api/v1/spaces/$(spaceID)/shares?$(vParams)"
+          );
+                    
+          CONCATENATE (AppShares)
+          LOAD	
+              [id] AS AppShareID,
+              [type] AS AppShareType,
+              If([type]='group',ApplyMap('Map_GroupID_GroupName',assigneeId),Null()) AS AppShareGroupName,
+              If([type]='group',assigneeId) AS AppShareGroupID,
+              [assigneeId] AS AppShareAssigneeID,
+              [spaceId] AS AppShareSpaceID,
+              Capitalize([spaceType]) AS AppShareSpaceType,
+    //           [tenantId],
+    //           [createdAt],
+    //           [updatedAt],
+    //           [createdBy],
+    //           [updatedBy],
+    //           [resourceType],
+              [resourceId] AS AppShareAppID,
+              [resourceName] AS AppShareAppName,
+              [__KEY_data] & '|' & '$(vAPICallCounter)' AS _AppShareKey
+    //           [__FK_data] AS [__KEY_root]
+          RESIDENT RestConnectorMasterTable
+          WHERE NOT IsNull([__FK_data]);
+
+          CONCATENATE(AppShareRoles)
+          LOAD	
+          	  ApplyMap('Map_SpaceRoleKey_SpaceRoleName',
+              		Lookup('AppShareSpaceType','_AppShareKey',[__FK_roles] & '|' & '$(vAPICallCounter)','AppShares') & '|' & Trim([@Value])
+                    ) AS AppShareRole,
+//               [@Value] AS AppShareRole,
+              [__FK_roles] & '|' & '$(vAPICallCounter)' AS _AppShareKey
+          RESIDENT RestConnectorMasterTable
+          WHERE NOT IsNull([__FK_roles]);
+
+          NextURL:
+          LOAD	
+              [href_u2] AS NextURL
+          RESIDENT RestConnectorMasterTable
+          WHERE NOT IsNull([__FK_next]);
+
+          DROP TABLE RestConnectorMasterTable;
+                    
+          LET vParams = SubField(Peek('NextURL',0,'NextURL'),'?',-1);
+          LET vNextURLRows = NoOfRows('NextURL');
+
+          DROP TABLE NextURL;
+          
+        LOOP WHILE $(vNextURLRows)>0;
         
-        AuditReloadLineage:
-        LEFT KEEP (DataConnections)
-        LOAD
-        	*,
-            ApplyMap('Map_DataConnectionID_DataConnectionName',DataConnectionID,'[Deleted]') as ReloadDataConnectionName,
-            If(Len(ApplyMap('Map_DataConnectionID_DataConnectionSpaceID',DataConnectionID))>0,
-                  ApplyMap('Map_SpaceID_SpaceName',ApplyMap('Map_DataConnectionID_DataConnectionSpaceID',DataConnectionID,'[UNKNOWN]')),
-                  'Personal - ' & ApplyMap('Map_UserID_$(vPersonalUserField)',ApplyMap('Map__AuditReloadKey_ReloadUserID',_AuditReloadKey)))
-                AS ReloadDataConnectionSpaceName,
-            If(Len(ApplyMap('Map_DataConnectionID_DataConnectionSpaceID',DataConnectionID))>0,
-                  ApplyMap('Map_SpaceID_SpaceType',ApplyMap('Map_DataConnectionID_DataConnectionSpaceID',DataConnectionID,Null())),
-                  'Personal')
-                AS ReloadDataConnectionSpaceType
-        RESIDENT TEMP;
+    NEXT spaceID
         
-        DROP TABLE TEMP;
-    END IF
 END SUB
+
+
+
+
+
+
+
 ///$tab Transform
 SUB transform
-    
-    RENAME TABLE Spaces TO TEMP;
-    
-    Spaces:
-    LEFT KEEP (Apps)
-    LOAD * RESIDENT TEMP;
-    
-    DROP TABLE TEMP;
-    
-    RENAME TABLE ReloadTasks TO TEMP;
-    
-    ReloadTasks:
-    LEFT KEEP (Apps)
-    LOAD * RESIDENT TEMP;
-    
-    DROP TABLE TEMP;
-    
-    RENAME TABLE UserRoles TO TEMP;
-    
-    UserRoles:
-    LEFT KEEP (Users)
-    LOAD * RESIDENT TEMP;
-    
-    DROP TABLE TEMP;
-    
-    RENAME TABLE Map_AppOwner_Exists TO TEMP;
-    
-    Map_AppOwner_Exists:
-    MAPPING LOAD DISTINCT
-    	*
-    RESIDENT TEMP;
-    
-    DROP TABLE TEMP;
-    
-    RENAME TABLE Map_AllApps_Temp TO TEMP;
-    
-    Map_AllApps_Final:
-    MAPPING LOAD DISTINCT
-    	*
-    RESIDENT TEMP;
-    
-    DROP TABLE TEMP;
-    
-    RENAME TABLE Map_ReloadID_TenantID TO TEMP;
-    
-    Map_ReloadID_TenantID:
-    MAPPING LOAD DISTINCT
-    	*
-    RESIDENT TEMP;
-    
-    DROP TABLE TEMP;
 
-    RENAME TABLE Reloads TO TEMP;
+    ////////////////////////////////
+    // Add app shares to space assignments
+        
+    CONCATENATE(SpaceAssignmentRoles)
+    LOAD DISTINCT
+    	_AppShareKey AS _KeySpaceRoleAssignment,
+        AppShareRole AS SpaceAssignmentRole
+    RESIDENT AppShareRoles;
     
-    Reloads:
+    CONCATENATE(SpaceAssignments)
+    LOAD DISTINCT
+    	_AppShareKey AS _KeySpaceRoleAssignment,
+        AppShareAssigneeID AS UserIDTemp,
+        AppShareGroupID AS GroupID,
+        AppShareSpaceType AS SpaceAssignmentRoleSpaceType,
+        If(Len(AppShareGroupName)>0,AppShareGroupName,'<Direct>') AS SpaceRoleInheritedFromGroupTemp,
+        If(Len(AppShareGroupName)>0,'Inherited','Direct') AS SpaceRoleAssignmentTypeTemp,
+        AppShareSpaceID AS SpaceID,
+        AppShareAppID,
+        AppShareSpaceID & '|' & AppShareAppID AS _SpaceAppKey,
+        'Shared' AS SpaceRoleAssignmentTypeLevel
+    RESIDENT AppShares;
+    
+    DROP TABLE AppShareRoles
+    		   ,AppShares
+               ; 
+                   
+	////////////////////////////////
+
+	// Map inherited groups to users
+	UserInheritedRoles:
+    NOCONCATENATE
+    LOAD DISTINCT
+    	*,
+        Null() AS UserRoleInheritedFromGroup
+    RESIDENT UserGroups;
+    
+    INNER JOIN(UserInheritedRoles)
+    LOAD DISTINCT
+    	GroupID,
+        GroupAssignedRoleID,
+        GroupName
+    RESIDENT Groups
+    WHERE Len(GroupAssignedRoleID)>=1;
+    
+    DROP FIELDS GroupAssignedRoleID FROM Groups;
+    
+    CONCATENATE(UserRoles)
+    LOAD
+    	_UserKey,
+        GroupAssignedRoleID AS UserRoleID,
+        GroupName AS UserRoleInheritedFromGroup,
+        GroupID AS UserRoleInheritedFromGroupID,
+        'Inherited' AS UserRoleAssignmentType,
+        '✔' AS UserRoleCheck
+    RESIDENT UserInheritedRoles;
+    
+    DROP TABLE UserInheritedRoles;
+    
+    // Propogate user groups to users to space role assignments
+    GroupID_UserKeyTemp:
     NOCONCATENATE
     LOAD
-    	*,
-        Interval(ReloadStartTime-ReloadCreationTime,'hh:mm:ss') AS ReloadQueueDuration
-    WHERE ReloadStartTime>=Date('$(vInitialDaysBack)');
-    LOAD
-        _AuditReloadKey,
-        TimeStamp(ReloadStartTime + $(vReloadTimeDiffFromGMT)) AS ReloadStartTime,
-        If(ApplyMap('Map_AllApps_Final',AppID)=1,AppID,Dual('[Deleted]',Autonumber(AppID))) AS AppID,
-        If(ApplyMap('Map_AppOwner_Exists',ReloadUserID)=1,ReloadUserID,Dual('[Deleted]',Autonumber(ReloadUserID))) AS ReloadUserID,
-        Date(Floor(Date(TimeStamp(ReloadStartDate + $(vReloadTimeDiffFromGMT))))) AS ReloadStartDate,
-        ReloadID,
-        ReloadType,
-        ReloadStatus,
-        ReloadDuration,
-        TimeStamp(ReloadCreationTime + $(vReloadTimeDiffFromGMT)) AS ReloadCreationTime,
-        Hour(TimeStamp(ReloadStartTime + $(vReloadTimeDiffFromGMT))) AS ReloadStartHour,
-        ReloadStartMinute,
-        TimeStamp(ReloadEndTime + $(vReloadTimeDiffFromGMT)) AS ReloadEndTime,
-        TimeStamp(ReloadEngineTime + $(vReloadTimeDiffFromGMT)) AS ReloadEngineTime,
-        ReloadPeakReloadRAM_MB,
-        ReloadPeakReloadRAM_GB,
-        BaseRAMFootprint
-    RESIDENT TEMP;
-
-    DROP TABLE TEMP;
+    	*
+    RESIDENT UserGroups;
     
-    CONCATENATE (Users)
+    LEFT JOIN(GroupID_UserKeyTemp)
     LOAD DISTINCT
-    	ReloadUserID,
-        Dual('[Deleted]',ReloadUserID) AS ReloadUserStatus,
-        Dual('[Deleted]',ReloadUserID) AS ReloadUserName,
-        Dual('[Deleted]',ReloadUserID) AS ReloadUserSubject,
-        Dual('[Deleted]',ReloadUserID) AS ReloadUserEmail
-    RESIDENT Reloads
-    WHERE ApplyMap('Map_AppOwner_Exists',ReloadUserID)<>1;
+    	UserID,
+        [_UserKey]
+    RESIDENT Users;
     
-    Map_ReloadID_ReloadPeakReloadRAM_MB:
-    MAPPING LOAD DISTINCT
-    	ReloadID,
-        ReloadPeakReloadRAM_MB
-    RESIDENT Reloads;
+    LEFT JOIN(SpaceAssignments)
+    LOAD
+    	GroupID,
+        UserID
+    RESIDENT GroupID_UserKeyTemp;
     
-END SUB;
-///$tab Reload Concurrency
-SUB reload_concurrency
-
-    RENAME TABLE Reloads TO TEMP;
-
-    Reloads:
-    LOAD
-        *,
-        If(ReloadStartTime>=$(vLast24Hours),1)AS Reloadlast24hours,
-        If(ReloadStartTime>=$(vLast7Days),1)  AS Reloadlast7days,
-        If(ReloadStartTime>=$(vLast30Days),1) AS Reloadlast30days,
-        If(ReloadStartTime>=$(vLast60Days),1) AS Reloadlast60days,
-        If(ReloadStartTime>=$(vLast90Days),1) AS Reloadlast90days,
-        If(ReloadStartTime<$(vLast30Days) AND ReloadStartTime>=$(vLast60Days),1) AS [Reloadlast30-60days],
-        If(ReloadStartTime<$(vLast60Days) AND ReloadStartTime>=$(vLast90Days),1) AS [Reloadlast60-90days],
-        AutoNumber(If(Len(ReloadCreationTime)>0,ReloadCreationTime,ReloadStartTime) & '|' & ReloadEndTime) AS _ReloadExecutionConcurrencyKey // Will traverse tenants
-    RESIDENT TEMP;
-
-    DROP TABLE TEMP;
-
-    // Establish Sort Order of Timeframe
-    Timeframe_Temp:
-    Load * Inline [
-      Timeframe 
-      Last 24 Hours
-      Last 7 Days
-      Last 30 Days
-      Last 60 Days
-      Last 90 Days
-      Last 30-60 Days
-      Last 60-90 Days
-    ];
-
-    Last_ReloadTime :
-    NOCONCATENATE LOAD DISTINCT ReloadStartTime, 'Last 24 Hours' AS [ReloadTimeframe] RESIDENT Reloads WHERE Reloadlast24hours =1;
-    CONCATENATE (Last_ReloadTime) LOAD DISTINCT ReloadStartTime, 'Last 7 Days'  AS [ReloadTimeframe] RESIDENT Reloads WHERE Reloadlast7days =1;
-    CONCATENATE (Last_ReloadTime) LOAD DISTINCT ReloadStartTime, 'Last 30 Days' AS [ReloadTimeframe] RESIDENT Reloads WHERE Reloadlast30days=1;
-    CONCATENATE (Last_ReloadTime) LOAD DISTINCT ReloadStartTime, 'Last 60 Days' AS [ReloadTimeframe] RESIDENT Reloads WHERE Reloadlast60days=1;
-    CONCATENATE (Last_ReloadTime) LOAD DISTINCT ReloadStartTime, 'Last 90 Days' AS [ReloadTimeframe] RESIDENT Reloads WHERE Reloadlast90days=1;
-    CONCATENATE (Last_ReloadTime) LOAD DISTINCT ReloadStartTime, 'Last 30-60 Days' AS [ReloadTimeframe] RESIDENT Reloads WHERE [Reloadlast30-60days]=1;
-    CONCATENATE (Last_ReloadTime) LOAD DISTINCT ReloadStartTime, 'Last 60-90 Days' AS [ReloadTimeframe] RESIDENT Reloads WHERE [Reloadlast60-90days]=1;
-
-    DROP FIELDS  Reloadlast24hours, Reloadlast7days, Reloadlast30days, Reloadlast60days, Reloadlast90days, [Reloadlast30-60days], [Reloadlast60-90days];
-    DROP TABLE Timeframe_Temp;
-
-    ReloadMinMaxDates:
-    LOAD
-        If(Min("ReloadCreationTime")>0,Min("ReloadCreationTime"),Min("ReloadStartTime")) AS "Reload Start Time Min",
-        Max("ReloadEndTime") AS "Reload End Time Max"
-    RESIDENT Reloads
-    WHERE If(Len("ReloadCreationTime")>0,"ReloadCreationTime","ReloadStartTime") >= Date('$(vMaxReloadConcurrencyDaysBack)');
-
-    LET vReloadMinDate = Peek('Reload Start Time Min',0,'ReloadMinMaxDates');
-    LET vReloadMaxDate = Peek('Reload End Time Max',0,'ReloadMinMaxDates');
-    LET vReloadMinDateFloor = Date(Floor('$(vReloadMinDate)'));
-    LET vReloadMaxDateFloor = Date(Floor('$(vReloadMaxDate)'));
-    LET vMinutes = Ceil(($(vReloadMaxDate)-$(vReloadMinDate))*24*(60/$(vConcurrencyMinutes)));
-
-    DROP TABLE ReloadMinMaxDates;
-
-    ConcurrencyMinutesTemp:
+    DROP TABLE GroupID_UserKeyTemp;
+    
+    RENAME TABLE SpaceAssignments TO TEMP;
+    
+    AUTONUMBER _KeySpaceRoleAssignment;
+    
+    SpaceAssignments:
     LOAD DISTINCT
-        TimeStamp(Round(Date($(vReloadMinDate)+((1/24/(60/$(vConcurrencyMinutes)))*RowNo())), 1/24/60/60)) AS ReloadConcurrencyMinute
-    AUTOGENERATE $(vMinutes);
-
-    LEFT JOIN IntervalMatch (ReloadConcurrencyMinute) 
-    LOAD 
-        If(Len(ReloadCreationTime)>0,ReloadCreationTime,ReloadStartTime) AS ReloadStartTime, 
-        ReloadEndTime
-    RESIDENT Reloads;
-
-    ReloadConcurrencyMinutes:
-    LOAD
-        ReloadConcurrencyMinute,
-        AutoNumber(ReloadStartTime & '|' & ReloadEndTime) AS _ReloadExecutionConcurrencyKey // Will traverse tenants
-    RESIDENT ConcurrencyMinutesTemp;
-
-    DROP TABLE ConcurrencyMinutesTemp;
-
-    LEFT JOIN (ReloadConcurrencyMinutes)
-    LOAD
-        ReloadID,
-        _ReloadExecutionConcurrencyKey,
-        ReloadCreationTime,
-        ReloadStartTime
-    RESIDENT Reloads;
-
-    RENAME TABLE ReloadConcurrencyMinutes TO TEMP;
-
-    ReloadConcurrencyMinutes:
-    LOAD
-        ReloadID,
-        ApplyMap('Map_ReloadID_ReloadPeakReloadRAM_MB',ReloadID,0) AS ReloadPeakReloadRAM_MB_Concurrency,
-        ReloadConcurrencyMinute,
-        If(ReloadConcurrencyMinute<ReloadStartTime,'QUEUED','RELOADING') AS ReloadConcurrencyMinuteStatus
-    RESIDENT TEMP;
-
-    DROP TABLE TEMP;
-
-    DROP FIELD _ReloadExecutionConcurrencyKey FROM Reloads;
-
-    ReloadDates:
-    LOAD
-        *,
-        Dual(ReloadStartYear & '-' & ReloadStartMonth,MonthStart(ReloadStartDate)) AS ReloadStartYearMonth
-        ;
-    LOAD
-        *,
-        Year(ReloadStartDate) AS ReloadStartYear,
-        Month(ReloadStartDate) AS ReloadStartMonth,
-        Date(WeekStart(ReloadStartDate)) AS ReloadStartWeek,
-        WeekDay(ReloadStartDate) AS ReloadStartWeekDay
-    ;
-    LOAD
-        Date(StartDate + IterNo() - 1 ) AS ReloadStartDate
-    While StartDate + IterNo() - 1 <= EndDate;
-    LOAD * INLINE
-        [StartDate, 			EndDate
-        $(vReloadMinDateFloor), $(vReloadMaxDateFloor)
-    ];
-
-    ReloadDurationBuckets:
-    LOAD
-        StartTime,
-        EndTime,
-        Dual(ReloadDurationBucket,Interval#(StartTime,'HH:mm:ss')) AS ReloadDurationBucket
-    INLINE [
-        StartTime,		EndTime,		ReloadDurationBucket
-        00:00:00,		00:29:59,		< 00:30
-        00:30:00,		00:59:59,		>= 00:30 < 1:00
-        01:00:00,		01:29:59,		>= 1:00 < 1:30
-        01:30:00,		01:59:59,		>= 1:30 < 2:00
-        02:00:00,		02:29:59,		>= 2:00 < 2:30
-        02:30:00,		02:59:59,		>= 2:30 < 3:00
-        03:00:00,		99:99:99,		>= 3:00
-    ];
-
-    IntervalMatch(ReloadDuration)
-    LEFT JOIN
-    LOAD
-        StartTime,
-        EndTime
-    RESIDENT ReloadDurationBuckets;
-
-    LEFT JOIN (Reloads)
-    LOAD DISTINCT
-        ReloadDuration,
-        ReloadDurationBucket
-    RESIDENT ReloadDurationBuckets;
-
-    RENAME TABLE ReloadDurationBuckets TO TEMP;
-
-    ReloadDurationBuckets:
-    LOAD
-        ReloadDurationBucket
-    RESIDENT TEMP;
-
-    DROP TABLE TEMP;
-            
-END SUB
-///$tab AutoNumber
-SUB autonumber
-	
-    AUTONUMBER
-    	_AuditReloadKey
-        ,_UserKey
-        ,FileNameUnique
-        ;
+    	_KeySpaceRoleAssignment,
+        SpaceID,
+        AppShareAppID,
+        RangeMaxString(UserIDTemp,UserID) AS UserID,
         
-    LEFT JOIN(Spaces)
+        	If(Len(SpaceRoleInheritedFromGroupTemp)>0,SpaceRoleInheritedFromGroupTemp,
+        	If(Len(GroupID)>0,ApplyMap('Map_GroupID_GroupName',GroupID),
+            '<Direct>')) AS SpaceRoleInheritedFromGroup,
+        
+        	If(Len(SpaceRoleAssignmentTypeTemp)>0,SpaceRoleAssignmentTypeTemp,
+        	If(Len(GroupID)>0,'Inherited',
+            'Direct')) AS SpaceRoleAssignmentType,
+        
+        SpaceAssignmentRoleSpaceType,    
+        _SpaceAppKey,
+        SpaceRoleAssignmentTypeLevel
+    RESIDENT TEMP
+    WHERE ((EXISTS (UserID,UserIDTemp) AND Len(GroupID)=0) OR Len(GroupID)>0) AND ApplyMap('Map_AllGroupIDs',RangeMaxString(UserIDTemp,UserID))<>1
+    ORDER BY _KeySpaceRoleAssignment ASC;
+    
+    DROP TABLE TEMP;
+    
+    LET vMax_KeySpaceRoleAssignment = If(NoOfRows('SpaceAssignments')>0,Peek('_KeySpaceRoleAssignment',-1,'SpaceAssignments'),0);
+    
+    CONCATENATE(SpaceAssignments)
     LOAD DISTINCT
-    	SpaceID,
-        Dual(SpaceName,AutoNumber(SpaceID)) as SpaceNameUnique
+    	RecNo() + $(vMax_KeySpaceRoleAssignment) AS _KeySpaceRoleAssignment,
+        SpaceOwnerID AS UserID,
+        SpaceID,
+        '<Direct>' AS SpaceRoleInheritedFromGroup,
+        'Direct' AS SpaceRoleAssignmentType,
+        ApplyMap('Map_SpaceID_SpaceType',SpaceID) AS SpaceAssignmentRoleSpaceType,
+        SpaceID & '|' AS _SpaceAppKey,
+        'Space' AS SpaceRoleAssignmentTypeLevel
     RESIDENT Spaces;
+    
+    CONCATENATE(SpaceAssignmentRoles)
+    LOAD DISTINCT
+    	RecNo() + $(vMax_KeySpaceRoleAssignment) AS _KeySpaceRoleAssignment,
+        'Owner' AS SpaceAssignmentRole
+    AUTOGENERATE NoOfRows('Spaces');
+    
+//  Append to link table
+    AppSharesLink:
+    LOAD DISTINCT
+    	_SpaceAppKey,
+        SpaceID,
+        AppShareAppID AS AppID
+    RESIDENT SpaceAssignments;
+    
+    DROP FIELD SpaceID FROM SpaceAssignments;
+    DROP FIELD AppShareAppID;
+    
+    Map__KeySpaceRoleAssignment_IsSpaceOwner:
+    MAPPING LOAD DISTINCT
+    	_KeySpaceRoleAssignment,
+        'True'
+    RESIDENT SpaceAssignmentRoles
+    WHERE SpaceAssignmentRole='Owner';
+    
+	// Fill table with empty user roles
+	SpaceAssignmentRoleAllPlaceholder:
+    LOAD DISTINCT
+    	_KeySpaceRoleAssignment,
+        SpaceAssignmentRoleSpaceType
+    RESIDENT SpaceAssignments
+    WHERE ApplyMap('Map__KeySpaceRoleAssignment_IsSpaceOwner',_KeySpaceRoleAssignment)='True';
+    
+    LEFT JOIN(SpaceAssignmentRoleAllPlaceholder)
+    LOAD DISTINCT
+    	RoleNameUI AS SpaceAssignmentRole,
+        SpaceAssignmentRoleSpaceType
+    RESIDENT SpaceRole_SpaceRoleName;
+    
+    OUTER JOIN(SpaceAssignmentRoleAllPlaceholder)
+    LOAD 
+    	*
+    RESIDENT SpaceAssignmentRoles;
         
-    LEFT JOIN(Apps)
-    LOAD DISTINCT
-    	AppID,
-        Dual(AppName,AutoNumber(AppID)) as AppNameUnique
-    RESIDENT Apps;
+    DROP TABLE SpaceAssignmentRoles;
     
-    LEFT JOIN(Apps)
-    LOAD DISTINCT
-    	AppID,
-        'False' AS AppIsDeleted,
-        'True' AS ExcludeDeletedAppsToggle
-    RESIDENT Apps;
+    DROP TABLE SpaceRole_SpaceRoleName;
+        
+    SpaceAssignmentRoles:
+    NOCONCATENATE
+    LOAD
+    	_KeySpaceRoleAssignment,
+        SpaceAssignmentRole,
+        '✔' AS SpaceAssignmentRoleCheck
+    RESIDENT SpaceAssignmentRoleAllPlaceholder;
     
-    CONCATENATE (Apps)
-    LOAD DISTINCT
-    	AppID,
-        'True' AS AppIsDeleted,
-        Dual('[Deleted]',AppID) AS AppName,
-        Dual('[Unknown]',AppID) AS SpaceID,
-        ApplyMap('Map_ReloadID_TenantID',ReloadID) AS TenantID,
-        '[Unknown]' AS AppCreatedTime,
-        '[Unknown]' AS AppUpdatedTime,
-        Dual('[Unknown]',AppID) AS AppCreatorID,
-        Dual('[Unknown]',AppID) AS AppUpdaterID,
-        Dual('[Unknown]',AppID) AS AppIsFavorited,
-        Dual('[Unknown]',AppID) AS AppDescription,
-        Dual('[Unknown]',AppID) AS AppHasSectionAccess,
-        Dual('[Unknown]',AppID) AS AppOwnerID,
-        '[Unknown]' AS AppLastReloadTime,
-        '[Unknown]' AS AppLastReloadTimeLocalServerTime,
-        Dual('[Unknown]',AppID) AS AppOriginalID,
-        Dual('[Unknown]',AppID) AS AppOwnerSubject,
-        Dual('[Unknown]',AppID) AS AppOwnerName,
-        Dual('[Unknown]',AppID) AS AppOwnerEmail,
-        '[Unknown]' AS AppPublishedTime,
-        Dual('[Unknown]',AppID) AS AppEncrypted,
-        Dual('[Unknown]',AppID) AS AppSpaceName,
-        Dual('[Deleted]',AppID) AS AppNameUnique
-    RESIDENT Reloads
-    WHERE ApplyMap('Map_AllApps_Final',AppID)<>1;
-    
-    RENAME TABLE DataConnections TO TEMP;
-    
-    DataConnections:
-    NOCONCATENATE LOAD
-    	*,
-        If(DataConnectionNameUniqueTemp='[Unknown Endpoints Connection]',DataConnectionNameUniqueTemp,Dual(DataConnectionName,AutoNumber(DataConnectionID))) AS DataConnectionNameUnique
-    RESIDENT TEMP;
-    
-    DROP TABLE TEMP;
-    DROP FIELD DataConnectionNameUniqueTemp;
-    
-END SUB
-///$tab Multi-Tenant
-Sub write_tenant_qvds(location, sub_dir, name, is_parent)
-  Trace Storing QlikMetaCollection QVDs.;
-  
-  Let location = If(Right('$(location)',1)='/',Left('$(location)',Len('$(location)')-1),'$(location)');
-  
-  If $(is_parent)=0 then
-  	Let vFullLocation = '$(location)/QlikMetaCollection/Tenants/$(vTenantID)/$(sub_dir)/$(name)';
-  Else
-  	Let vFullLocation = '$(location)/QlikMetaCollection/CompiledTenants/$(sub_dir)/$(name)';
-  End if
+    DROP TABLE SpaceAssignmentRoleAllPlaceholder;
 
-  For i = 0 to NoOfTables()-1
-    Let vTableName = TableName($(i));
-    Trace Storing $(vTableName).;
-    Store $(vTableName) Into [$(vFullLocation)/$(vTableName).qvd](qvd);
-    Trace $(vTableName) stored!;
-  Next i
-  
-End Sub
+    // Autonumber (not using wildcard since "_KeySpaceRoleAssignment" had to be done earlier)
+	AUTONUMBER	_SpaceAppKey
+    			,_UserKey
+                ,_UserRolePermissionKey
+    			;
 
-Sub load_multi_tenant_qvds(location, sub_dir, name)
-
-	Let vDirLocation = If(Right('$(location)',1)='/',Left('$(location)',Len('$(location)')-1),'$(location)');
-    Let vAnyFileFound = 0;
-
-	Let vTenants = 1;
-	For Each Dir in DirList('$(vDirLocation)/QlikMetaCollection/Tenants/')
-
-	  Let vFolder = '$(Dir)$(sub_dir)/$(name)/';
-      Let vTenant = TextBetween('$(vFolder)','$(vDirLocation)/','/$(sub_dir)/');
-      Trace --------------------;
-      Trace Looking to load data for Tenant: $(vTenant);
-      Trace --------------------;
-
-	  Let vTenantFileFound = 0;
-      For Each file in FileList('$(vFolder)')
-        If WildMatch('$(file)','*.qvd') THEN
-          Let vAnyFileFound = 1;
-          Let vTenantFileFound = 1;
-          
-	      Let vTableName = TextBetween(Subfield('$(file)','/',-1),Null(),'.qvd');
-          "$(vTableName)":
-          Load Distinct
-              *
-          From [$(file)](qvd);
-        End If
-      Next file
-      
-      If $(vTenantFileFound) then
-      	Trace Completed loading QVDs for Tenant: $(vTenant);
-        Let vTenants = $(vTenants) + 1;
-      Else
-        Trace No QVDs were found for Tenant: $(vTenant);
-      End If
-              
-    Next Dir
-    
-    Let vTenants = $(vTenants) - 1;
-    
-    If $(vAnyFileFound)>0 then
-      Trace --------------------;
-      Trace Successfully loaded data from $(vTenants) Tenants!;
-      Trace --------------------;
-    Else
-      Trace --------------------;
-      Trace No QVDs were Found! Confirm that this directory is the parent directory of "QlikMetaCollection".;
-      Trace --------------------;
-    End If
-
-
-End Sub
-///$tab Helper Functions
-SUB execute_sub(sub_routine)
-  Trace Working on $(sub_routine);
-  Let sub_start = Num(Now(1));
-  Call $(sub_routine)
-  Let sub_finish = Num(Now(1));
-  Let sub_duration = Num(Round((sub_finish-sub_start)*86400),'#,##0');
-  Trace $(sub_routine) completed after $(sub_duration) seconds.;
 END SUB
 ///$tab Main
 //// App Variables & Messaging
@@ -2364,79 +1300,26 @@ SET LongMonthNames='January;February;March;April;May;June;July;August;September;
 SET DayNames='Mon;Tue;Wed;Thu;Fri;Sat;Sun';
 SET LongDayNames='Monday;Tuesday;Wednesday;Thursday;Friday;Saturday;Sunday';
 SET NumericalAbbreviation='3:k;6:M;9:G;12:T;15:P;18:E;21:Z;24:Y;-3:m;-6:μ;-9:n;-12:p;-15:f;-18:a;-21:z;-24:y';
+SET HidePrefix='_';
 
 // Reset these variables
-LET reload_start 	= Now(1);
-SET start_msg=; 
-SET comp=;
-Let vTenants = 0;
+LET vReloadStart 	= Now(1);
+SET vStartMsg=; 
+SET vComp=;
 
-SET app_name		= 'Reload Analyzer';
-SET app_version		= '4.0.4';
-LET comp 			= ComputerName(); 
-LET engine_ver 		= PurgeChar(EngineVersion(),Chr(39)); 
-LET start_msg 		= 'Reloading $(app_name) $(app_version) from $(comp) running QIX Engine version $(engine_ver)';
+SET vAppName		= 'Access Evaluator';
+SET vAppVersion		= '2.1.2';
+LET vComp 			= ComputerName(); 
+LET vEngineVer 		= PurgeChar(EngineVersion(),Chr(39)); 
+LET vStartMsg 		= 'Reloading $(vAppName) $(vAppVersion) from $(vComp) running QIX Engine version $(vEngineVer)';
 
-Trace $(startMsg);
+TRACE $(vStartMsg);
 
-SUB load_core_data
-    Trace Loading data...;
-    For Each sub_routine in 'check_version','get_tenant_metadata','get_users','get_spaces','get_data_connections','get_apps','get_reloads','get_reload_tasks','get_audit_reloads','incremental','conns_and_spaces_names'
-        Call execute_sub(sub_routine)
-    Next sub_routine
-    
-    If $(vu_track_app_meta_over_time) then
-        Call store_app_meta_rolling
-    End If
-END SUB
-
-SUB transform_data
-    Trace Transforming data...;
-    For Each sub_routine in 'transform','reload_concurrency','autonumber'
-        Call execute_sub(sub_routine)
-    Next sub_routine
-END SUB
-
-
-// Main
-If $(vu_multi_tenant_enabled)=1 then 
-    If $(vu_is_parent_app)=1 then
-        Trace This application is configured for a Multi-Tenant setup and has been designated as a **Parent** app.;
-        Trace This application will attempt to load all of the QVDs that have been generated for the $(app_name) within the "QlikMetaCollection" folder found within "$(vu_qlik_meta_collection_parent_dir)";
-        Trace This application will then store all resulting QVDs to a "CompiledTenants" directory.;
-        
-        Call execute_sub('variables')
-        Call execute_sub('load_multi_tenant_qvds(''$(vu_qlik_meta_collection_parent_dir)'',''Monitoring'',''$(app_name)'')')
-
-        If $(vTenants)>0 then
-        	Call execute_sub('get_user_field')
-            Call transform_data
-        End If
-        
-        Trace This application will attempt to store all of the tables from this model to the "QlikMetaCollection/CompiledTenants" folder found within $(vu_qlik_meta_collection_parent_dir);
-  		Call execute_sub('write_tenant_qvds(''$(vu_qlik_meta_collection_parent_dir)'',''Monitoring'',''$(app_name)'',1)')
-        
-        Trace Data fetched from $(vTenants) tenants.;
-    Else
-        Trace This application is configured for a Multi-Tenant setup and has been designated as a **Child** app.;
-        Trace This application will attempt to store all of the tables from this model to the "QlikMetaCollection" folder found within "$(vu_qlik_meta_collection_parent_dir)";
-		
-        Call execute_sub('variables')
-        Call load_core_data
-        Call execute_sub('write_tenant_qvds(''$(vu_qlik_meta_collection_parent_dir)'',''Monitoring'',''$(app_name)'',0)')
-        Call execute_sub('get_user_field')
-        Call transform_data
-    End If
-Else
-    Call execute_sub('variables')
-    Call load_core_data
-    Call execute_sub('get_user_field')
-    Call transform_data
-
-    Trace Data fetched from $(vu_tenant_fqdn);
-End If
-
-LET reload_end = Now(1);
-LET reload_duration = Num(Ceil((reload_end-reload_start)*86400),'#,##0');
-LET reload_message = 'At $(reload_end), $(app_name) v$(app_version) finished reloading on $(comp) (QIX Engine $(engine_ver)) after $(reload_duration) seconds.';
-Trace $(reload_message);
+FOR EACH sub_routine in 'variables','check_version','get_roles','get_users','get_groups','get_spaces','get_apps','get_space_types','space_role_mapping','get_space_assignments','get_app_shares','transform'
+  TRACE Working on $(sub_routine);
+  LET sub_start = Num(Now(1));
+  CALL $(sub_routine)
+  LET sub_finish = Num(Now(1));
+  LET sub_duration = Num(Round((sub_finish-sub_start)*86400),'#,##0');
+  TRACE $(sub_routine) completed after $(sub_duration) seconds.;
+NEXT sub_routine
